@@ -1,7 +1,5 @@
 import math
 import cv2
-from multiprocessing.pool import ThreadPool
-import threading
 
 def calulate_points(x,y):
     xPoint = 640

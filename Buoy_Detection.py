@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-from SimpleCV import *
 
 # mouse callback function
 def buoy_points(event,x,y,flags,param):
