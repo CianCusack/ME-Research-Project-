@@ -14,7 +14,7 @@ yCoord = 100
 xCoord = 100
 
 def record():
-    cam = cv2.VideoCapture('res/KishRaceCloseBoat.mp4')
+    cam = cv2.VideoCapture('res/KishRace6.mp4')
     display = cv2.namedWindow('image')
     cv2.setMouseCallback('image', buoy_points)
     while True:
@@ -30,7 +30,7 @@ def record():
             roi = cv2.Canny(roi, 100,200)
             #Contours
             ret, thresh = cv2.threshold(roi, 127, 255, 0)
-            contours, hierarchy = cv2.findContours(thresh, 1, 2)
+            _, contours, hierarchy = cv2.findContours(thresh, 1, 2)
 
             for c in contours:
                 if cv2.contourArea(c) > 5000:
