@@ -70,7 +70,7 @@ def record():
 
 
 def track_buoy():
-    cam = cv2.VideoCapture('../res/new_race.mov')
+    cam = cv2.VideoCapture('../res/new_race_4.mov')
     display = cv2.namedWindow('image')
     cv2.setMouseCallback('image', buoy_points)
     ver, first = cam.read()
