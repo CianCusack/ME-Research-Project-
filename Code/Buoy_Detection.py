@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import matplotlib as plt
 from feature_recognition_practice import *
 
 # mouse callback function
@@ -16,7 +15,7 @@ xCoord = 100
 
 
 def record():
-    cam = cv2.VideoCapture('../res/new_race_1.MOV')
+    cam = cv2.VideoCapture('../res/new_race_2.MOV')
     starting_frame = np.zeros((720,780,3), np.uint8)
     display = cv2.namedWindow('image')
     cv2.setMouseCallback('image', buoy_points)
@@ -70,7 +69,7 @@ def record():
 
 
 def track_buoy():
-    cam = cv2.VideoCapture('../res/new_race.mov')
+    cam = cv2.VideoCapture('../res/red_buoy_race_2.mov')
     display = cv2.namedWindow('image')
     cv2.setMouseCallback('image', buoy_points)
     ver, first = cam.read()
@@ -106,8 +105,11 @@ def track_buoy():
             x1, y1, x2, y2 = match_features(res, masked_frame)
             #xCoord, yCoord = (x1+x2)/2, (y1+y2)/2
             #cv2.rectangle(frame, (xCoord-26, yCoord-26), ((xCoord + 26), (yCoord + 26)), (255, 0, 0), 1)
-            cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 1)
-            cv2.line(frame, (1280 / 2, 720), (x2, y2), (0, 0, 255), 1)
+            if x1 != 1280 and y1 != 720:
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 1)
+                cv2.line(frame, (1280 / 2, 720), (x2, y2), (0, 0, 255), 1)
+            else:
+                cv2.putText(frame, "No buoy", (200, 300), cv2.FONT_HERSHEY_COMPLEX_SMALL, 10, (0,0,0))
 
             cv2.imshow('image', frame)
             cv2.waitKey(50)
