@@ -3,15 +3,17 @@ import cv2
 from matplotlib import pyplot as plt
 
 
-img1 = cv2.imread('res/boat.jpg',0)          # queryImage
+img1 = cv2.imread('../res/boat.jpg',0)          # queryImage
 #img1 = cv2.resize(img1, (720,480) )
 #cam = cv2.VideoCapture(0)
 #cam = cv2.VideoCapture('res/KishRace6BoatCloseShort.mp4')
-cam = cv2.VideoCapture('res/KishRace1.mp4')
+cam = cv2.VideoCapture('../res/new_race.MOV')
 
 while True:
 
     ret, img2 = cam.read()
+    if not ret:
+        break
 
     detector = cv2.SimpleBlobDetector_create()
 
@@ -34,8 +36,8 @@ while True:
     pts = [p.pt for p in kp]
 
 
-    img_out = cv2.drawKeypoints(img2, kp[:10],None, color=(255, 0, 0))
-    cv2.circle(img_out, (int(pts[0][0]), int(pts[0][1])), 3, (0,255,0), thickness= 5)
+    img_out = cv2.drawKeypoints(img2, kp[:10],None, color=(255, 255, 0))
+    #cv2.circle(img_out, (int(pts[0][0]), int(pts[0][1])), 3, (0,255,0), thickness= 5)
 
     # Initiate SIFT detector
     orb = cv2.ORB_create()
@@ -57,10 +59,11 @@ while True:
     list_kp2 = []
 
     # Draw first 10 matches.
-    img3 = cv2.drawMatches(img1,kp1,img2,kp2,matches[:29],None, flags=2)
+    img3 = cv2.drawMatches(img1,kp1,img2,kp2,matches[:10],None, flags=2)
 
-
+    cv2.imwrite('features', img3)
     cv2.imshow('match', img3)
     cv2.imshow('original', img_out)
 
     cv2.waitKey(1)
+cam.release()

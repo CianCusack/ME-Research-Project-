@@ -1,7 +1,8 @@
 import cv2
+import matplotlib.pyplot as plt
 #file_name = "res/Screen-Shots/Intersection1.png"
 
-cap = cv2.VideoCapture('res/KishRace6BoatCloseShort.mp4')
+cap = cv2.VideoCapture('../res/KishRace6BoatCloseShort.mp4')
 #cap = cv2.VideoCapture(0)
 
 kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
@@ -9,6 +10,8 @@ fgbg = cv2.createBackgroundSubtractorMOG2(detectShadows=True)
 
 while(1):
     ret, frame = cap.read()
+    if not ret:
+        break
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     ret, thresh = cv2.threshold(gray, 127, 255, 0)
 

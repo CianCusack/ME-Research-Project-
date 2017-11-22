@@ -69,7 +69,10 @@ def record():
 
 
 def track_buoy():
-    cam = cv2.VideoCapture('../res/new_race_4.mov')
+    buoy_points_array = []
+    cam = cv2.VideoCapture('../res/new_race.mov')
+    fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+    #out = cv2.VideoWriter('demo.mp4', fourcc, 20.0, (1280, 720))
     display = cv2.namedWindow('image')
     cv2.setMouseCallback('image', buoy_points)
     ver, first = cam.read()
@@ -103,6 +106,8 @@ def track_buoy():
 
             #returns bounding points of buoy
             x1, y1, x2, y2 = match_features(res, masked_frame)
+            buoy_points_array.append(x1)
+            #buoy_points_array.append([(x1,y1), (x2,y2)])
             #xCoord, yCoord = (x1+x2)/2, (y1+y2)/2
             #cv2.rectangle(frame, (xCoord-26, yCoord-26), ((xCoord + 26), (yCoord + 26)), (255, 0, 0), 1)
             if x1 != 1280 and y1 != 720:
@@ -111,9 +116,12 @@ def track_buoy():
             else:
                 cv2.putText(frame, "No buoy", (200, 300), cv2.FONT_HERSHEY_COMPLEX_SMALL, 10, (0,0,0))
 
+            #out.write(frame)
             cv2.imshow('image', frame)
             cv2.waitKey(50)
 
     print "Reached end of file"
+    print buoy_points_array
     cv2.destroyAllWindows()
+    #out.release()
     exit(-1)
