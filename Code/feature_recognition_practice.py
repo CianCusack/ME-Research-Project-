@@ -19,14 +19,14 @@ def match_features(img1, img2):
     bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
 
     # Match descriptors.
-    if len(kp1) != 0 and len(kp2) != 0:
-
+    if len(kp2) != 0:
+        #return True
         matches = bf.match(des1,des2)
         # Sort them in the order of their distance.
         matches = sorted(matches, key = lambda x:x.distance)
 
         img4 = cv2.drawKeypoints(img2, kp2, None, (255,255,255), flags = 0)
-        img3 = cv2.drawMatches(img1, kp1, img2, kp2, matches[:50], None, flags=2)
+        #img3 = cv2.drawMatches(img1, kp1, img2, kp2, matches[:50], None, flags=2)
 
         for p in kp2:
             if p.pt[0] > x_max:
@@ -40,9 +40,12 @@ def match_features(img1, img2):
 
 
         cv2.rectangle(img4, (int(x_min), int(y_min)), (int(x_max), int(y_max)), (0,255,0))
-        #plt.imshow(img3), plt.show()
-        #cv2.imshow('img4', img4)
-        #cv2.waitKey(1)
-    return int(x_min), int(y_min), int(x_max), int(y_max)
-
+        cv2.imshow('match', img4)
+        cv2.waitKey(1)
+        return True
+    #if  x_max == 0 and x_min == 1280 and y_max == 0 and y_min == 720:
+        #return last_x1, last_y1, last_x2, last_y2
+    #return int(x_min), int(y_min), int(x_max), int(y_max)"""
+    else:
+        return False
 

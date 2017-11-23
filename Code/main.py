@@ -15,3 +15,4 @@ track_buoy()
 #resize_all()
 """
 #use_cascade()
+#record()

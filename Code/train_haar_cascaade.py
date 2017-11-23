@@ -130,7 +130,7 @@ def create_pos():
 def use_cascade():
     #boat_cascade = cv2.CascadeClassifier('data/old data/cascade.xml')
     boat_cascade = cv2.CascadeClassifier('../bin/data/cascade.xml')
-    cam = cv2.VideoCapture('../res/KishRace6BoatCloseShort.mp4')
+    cam = cv2.VideoCapture('../res/new_race_1.mov')
     #cam = cv2.VideoCapture('res/new_race.MOV')
     #fourcc = cv2.VideoWriter_fourcc(*'DIVX')
     #out = cv2.VideoWriter('output.mp4', fourcc, 20.0, (1280, 720))
@@ -139,12 +139,12 @@ def use_cascade():
         if not ret:
             break
         #img = cv2.imread('res/Screen-Shots/Intersection1.png')
-        #img = cv2.imread('res/High-Res Boats At A Distance/1.jpg')
+        img = cv2.imread('../res/single_boat.jpg')
         #img = cv2.resize(img, (400,400))
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         #roi = np.zeros((1280,400,3), np.uint8)
 
-        faces = boat_cascade.detectMultiScale(gray, scaleFactor = 1.05, minNeighbors = 1)#, minSize = (100,100), maxSize = (1280,720))
+        faces = boat_cascade.detectMultiScale(gray, scaleFactor = 1.05, minNeighbors = 0, minSize = (100,100), maxSize = (1280,720))
         for (x, y, w, h) in faces:
             cv2.circle(img, (x, y+h), 2, (255, 0, 0), 2)
             cv2.line(img,(x, y+h), (x+(w/2),y), (0,0,255))
