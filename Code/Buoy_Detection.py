@@ -77,7 +77,7 @@ def track_buoy():
     lower_red = np.array([150, 150, 100])
     upper_red = np.array([255, 255, 255])
     cam = cv2.VideoCapture('../res/horizontal_race.mov')
-    #cam = cv2.VideoCapture('../res/new_race_2.mov')
+    #cam = cv2.VideoCapture('../res/new_race.mov')
     #cam = cv2.VideoCapture('../res/KishRace1.mp4')
     #fourcc = cv2.VideoWriter_fourcc(*'DIVX')
     #out = cv2.VideoWriter('demo.mp4', fourcc, 20.0, (1280, 720))

@@ -26,12 +26,17 @@ def match_template(img, template):
         hsv = cv2.cvtColor(template, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv, lower_red, upper_red)
         res_template = cv2.bitwise_and(template, template, mask=mask)
-        img3 = img2[y1-50:y2+50, x1-50:x2+50].copy()
-        if len(img3) == 0:
-            img3 = img2.copy()
-        hsv = cv2.cvtColor(img3, cv2.COLOR_BGR2HSV)
 
-        mask = cv2.inRange(hsv, lower_red, upper_red)
+        if y1-50 >0 and x1-50 >0 and x2+50 < 1280 and y2+50 < 720:
+            img3 = img2[y1 - 50:y2 + 50, x1 - 50:x2 + 50].copy()
+            hsv = cv2.cvtColor(img3, cv2.COLOR_BGR2HSV)
+            mask = cv2.inRange(hsv, lower_red, upper_red)
+        else:
+            img3 = img2.copy()
+            hsv = cv2.cvtColor(img3, cv2.COLOR_BGR2HSV)
+            mask = cv2.inRange(hsv, lower_red, upper_red)
+        print len(img3)
+
         res_img = cv2.bitwise_and(img3, img3, mask=mask)
         cv2.imshow('res_template buoy', res_template)
         cv2.imshow('res_img buoy', res_img)
