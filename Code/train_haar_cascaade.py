@@ -127,43 +127,12 @@ def create_pos():
                 with open('positive.txt', 'a') as f:
                     f.write(line)
 
-def use_cascade():
-    #boat_cascade = cv2.CascadeClassifier('data/old data/cascade.xml')
+def use_cascade(img):
     boat_cascade = cv2.CascadeClassifier('../bin/data/cascade.xml')
-    cam = cv2.VideoCapture('../res/new_race_1.mov')
-    #cam = cv2.VideoCapture('res/new_race.MOV')
-    #fourcc = cv2.VideoWriter_fourcc(*'DIVX')
-    #out = cv2.VideoWriter('output.mp4', fourcc, 20.0, (1280, 720))
-    while True:
-        ret,img = cam.read()
-        if not ret:
-            break
-        #img = cv2.imread('res/Screen-Shots/Intersection1.png')
-        img = cv2.imread('../res/single_boat.jpg')
-        #img = cv2.resize(img, (400,400))
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        #roi = np.zeros((1280,400,3), np.uint8)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        faces = boat_cascade.detectMultiScale(gray, scaleFactor = 1.05, minNeighbors = 0, minSize = (100,100), maxSize = (1280,720))
-        for (x, y, w, h) in faces:
-            cv2.circle(img, (x, y+h), 2, (255, 0, 0), 2)
-            cv2.line(img,(x, y+h), (x+(w/2),y), (0,0,255))
-            cv2.circle(img, (x+(w/2), y), 2, (255, 0, 0), 2)
-            cv2.line(img, (x + (w / 2), y), (x+w, y+h), (0, 0, 255))
-            cv2.circle(img, (x+w, y+h), 2, (255, 0, 0), 2)
-            cv2.line(img, (x, y + h), (x+w, y+h), (0, 0, 255))
-            roi = img[y:y+h, x:x+w].copy()
-            #cv2.rectangle(img, (x,y), (x+w,y+h), (255,0,0))
+    boats = boat_cascade.detectMultiScale(gray, scaleFactor = 1.05, minNeighbors = 3, minSize = (10,10), maxSize = (1280,720))
+    return boats
 
-        img = cv2.resize(img, (1280,720))
-        #roi = cv2.resize(roi, (600,600))
-        #cv2.imshow('roi', roi)
-        #out.write(img)
-        cv2.imshow('img', img)
-        cv2.imwrite('boat-detection.png', img)
-        cv2.waitKey(1)
-    cam.release()
-    cv2.destroyAllWindows()
-    #out.release()
 
 

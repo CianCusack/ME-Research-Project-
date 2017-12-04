@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-cam = cv2.VideoCapture('res/KishRace6BoatCloseShort.mp4')
+cam = cv2.VideoCapture('../res/KishRace6BoatCloseShort.mp4')
 count = 0
 while count < 100:
     #img = cv2.imread('res/shapes.png', cv2.CV_8UC1)

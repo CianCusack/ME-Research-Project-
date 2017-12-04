@@ -2,7 +2,7 @@ import math
 import cv2
 import numpy as np
 
-def calulate_points(x,y):
+def calculate_points(x,y):
     xPoint = 640.0
     yPoint = 720.0
     listPoints = []
@@ -10,8 +10,14 @@ def calulate_points(x,y):
     #print m
     m = math.ceil(m*100)/100
     #print m
-    xSteps = np.arange(xPoint, x, 0.1)
-    ySteps = np.arange(y, yPoint, 0.1)
+    if xPoint < x:
+        xSteps = np.arange(xPoint, x, 0.1)
+    else:
+        xSteps = np.arange(x, xPoint, 0.1)
+    if yPoint < y:
+        ySteps = np.arange(yPoint, y, 0.1)
+    else:
+        ySteps = np.arange(y, yPoint, 0.1)
     for i in xSteps:
         for j in ySteps:
             if(i!= xPoint and j!=yPoint):

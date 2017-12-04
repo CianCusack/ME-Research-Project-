@@ -35,7 +35,6 @@ def match_template(img, template):
             img3 = img2.copy()
             hsv = cv2.cvtColor(img3, cv2.COLOR_BGR2HSV)
             mask = cv2.inRange(hsv, lower_red, upper_red)
-        print len(img3)
 
         res_img = cv2.bitwise_and(img3, img3, mask=mask)
         cv2.imshow('res_template buoy', res_template)
@@ -43,4 +42,4 @@ def match_template(img, template):
         if match_features(res_template, res_img):
             return x1,y1,x2,y2
         else:
-            return 0,0,0,0
+            return 0,0,1280,720
