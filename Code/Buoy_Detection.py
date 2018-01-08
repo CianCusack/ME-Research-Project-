@@ -130,7 +130,7 @@ def track_buoy(frame, buoy = []):
         #     counter+=1
         #     if counter > 10:
         #         last_y1 = 0
-        x1, y1, x2, y2 = match_template(frame, buoy)
+        x1, y1, x2, y2 = match_template(frame, buoy, [lower_bound, upper_bound])
         # Need to check that returned buoy image is the same color as the buoy
         returned_buoy = frame[y1:y2, x1:x2].copy()
 

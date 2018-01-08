@@ -12,7 +12,6 @@ def read_video():
     ver, first = cam.read()
     #first = imutils.rotate(first, 90)
 
-    first = cv2.imread('../res/orange_square.jpg')
     cv2.imshow('image', first)
     cv2.waitKey(3000)
     buoy = []
@@ -25,7 +24,6 @@ def read_video():
         if not ret:
             break
 
-        frame = cv2.imread('../res/orange_square.jpg')
         #Buoy
         buoy_x1, buoy_y1, buoy_x2, buoy_y2, buoy = track_buoy(frame.copy(), buoy)
         max_buoy_width = max_buoy_height = 60
