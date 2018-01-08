@@ -131,7 +131,7 @@ def use_cascade(img):
     boat_cascade = cv2.CascadeClassifier('../bin/data/cascade.xml')
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    boats = boat_cascade.detectMultiScale(gray, scaleFactor = 1.05, minNeighbors = 3, minSize = (10,10), maxSize = (1280,720))
+    boats = boat_cascade.detectMultiScale(gray, scaleFactor = 1.01, minNeighbors = 3)
     return boats
 
 

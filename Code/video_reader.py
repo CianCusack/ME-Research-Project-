@@ -5,14 +5,14 @@ from motion_detection import *
 
 def read_video():
     #cam = cv2.VideoCapture('../res/horizontal_race.mov')
-    #cam = cv2.VideoCapture('../res/new_race.mov')
-    cam = cv2.VideoCapture('../res/KishRace6.mp4')
-    fourcc = cv2.VideoWriter_fourcc(*'DIVX')
-    out = cv2.VideoWriter('demo.mp4', fourcc, 23.0, (1280, 720))
+    cam = cv2.VideoCapture('../res/new_race_4.mov')
+    #cam = cv2.VideoCapture('../res/KishRace6.mp4')
     display = cv2.namedWindow('image')
     cv2.setMouseCallback('image', buoy_points)
     ver, first = cam.read()
     #first = imutils.rotate(first, 90)
+
+    first = cv2.imread('../res/orange_square.jpg')
     cv2.imshow('image', first)
     cv2.waitKey(3000)
     buoy = []
@@ -25,6 +25,7 @@ def read_video():
         if not ret:
             break
 
+        frame = cv2.imread('../res/orange_square.jpg')
         #Buoy
         buoy_x1, buoy_y1, buoy_x2, buoy_y2, buoy = track_buoy(frame.copy(), buoy)
         max_buoy_width = max_buoy_height = 60
@@ -41,17 +42,15 @@ def read_video():
                 last_y1 = 0
 
         #Boats
-        boats = use_cascade(frame.copy())
-        for (x, y, w, h) in boats:
-            cv2.circle(frame, (x, y + h), 2, (255, 0, 0), 2)
-            cv2.line(frame, (x, y + h), (x + (w / 2), y), (0, 0, 255))
-            cv2.circle(frame, (x + (w / 2), y), 2, (255, 0, 0), 2)
-            cv2.line(frame, (x + (w / 2), y), (x + w, y + h), (0, 0, 255))
-            cv2.circle(frame, (x + w, y + h), 2, (255, 0, 0), 2)
-            cv2.line(frame, (x, y + h), (x + w, y + h), (0, 0, 255))
+        # boats = use_cascade(frame.copy())
+        # for (x, y, w, h) in boats:
+        #     cv2.circle(frame, (x, y + h), 2, (255, 0, 0), 2)
+        #     cv2.line(frame, (x, y + h), (x + (w / 2), y), (0, 0, 255))
+        #     cv2.circle(frame, (x + (w / 2), y), 2, (255, 0, 0), 2)
+        #     cv2.line(frame, (x + (w / 2), y), (x + w, y + h), (0, 0, 255))
+        #     cv2.circle(frame, (x + w, y + h), 2, (255, 0, 0), 2)
+        #     cv2.line(frame, (x, y + h), (x + w, y + h), (0, 0, 255))
         cv2.imshow('image', frame)
-        out.write(frame)
         cv2.waitKey(1)
     cam.release()
-    out.release()
 
