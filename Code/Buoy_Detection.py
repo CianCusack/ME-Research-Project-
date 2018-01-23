@@ -81,11 +81,11 @@ def record():
 def track_buoy(frame, buoy = []):
     last_x1, last_y1, last_x2, last_y2 = 0,0,0,0
     buoy_points_array = []
-    lower_red = np.array([150, 150, 100])
-    upper_red = np.array([255, 255, 255])
     global count
     counter =0
     size = 0
+    max_buoy_height = 0
+    max_buoy_width = 0
     if xCoord != 100 and yCoord != 100:
         #Find the buoy
         if count < 1:
@@ -97,7 +97,6 @@ def track_buoy(frame, buoy = []):
             size = calc_range(distance)
             #Get buoy image
             buoy = frame[yCoord - size:yCoord + size, xCoord - size:xCoord + size].copy()
-            max_buoy_height, max_buoy_width = buoy.shape[:2]
             # ***** Only for debugging *****
             hsv = cv2.cvtColor(buoy, cv2.COLOR_BGR2HSV)
             mask = cv2.inRange(hsv, lower_bound, upper_bound)
@@ -131,7 +130,7 @@ def track_buoy(frame, buoy = []):
         #     if counter > 10:
         #         last_y1 = 0
         x1, y1, x2, y2 = match_template(frame, buoy, [lower_bound, upper_bound])
-        # Need to check that returned buoy image is the same color as the buoy
+        # Need to check that returned buoy image is the same color as the buoy check mask is in same area same size
         returned_buoy = frame[y1:y2, x1:x2].copy()
 
         return x1, y1, x2, y2, buoy
