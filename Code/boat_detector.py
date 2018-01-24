@@ -38,6 +38,7 @@ def detect_boats(image):
 
     # loop over the detections
     boats = []
+    coords = []
     for i in np.arange(0, detections.shape[2]):
         # extract the confidence (i.e., probability) associated with the
 		# prediction
@@ -53,6 +54,7 @@ def detect_boats(image):
             idx = int(detections[0, 0, i, 1])
             box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
             startX, startY, endX, endY = box.astype("int")
+            coords.append([startX, startY, endX, endY])
             boat = image[startY:endY, startX: endX].copy()
             boats.append(boat)
 
@@ -67,4 +69,4 @@ def detect_boats(image):
 
     # show the output image
     cv2.imshow("Output", image)
-    return boats
+    return boats, coords
