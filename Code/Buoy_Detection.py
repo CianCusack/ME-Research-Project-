@@ -79,7 +79,7 @@ def record():
 
 
 def track_buoy(frame, buoy = []):
-    last_x1, last_y1, last_x2, last_y2 = 0,0,0,0
+    last_x1, last_y1, last_x2, last_y2 = 0.00,0.00,0.00,0.00
     buoy_points_array = []
     global count
     counter =0
@@ -133,7 +133,7 @@ def track_buoy(frame, buoy = []):
         # Need to check that returned buoy image is the same color as the buoy check mask is in same area same size
         returned_buoy = frame[y1:y2, x1:x2].copy()
 
-        return x1, y1, x2, y2, buoy
+        return float(x1),float(y1),float(x2),float(y2), buoy
     else:
         return 0,0,0,0, buoy
 

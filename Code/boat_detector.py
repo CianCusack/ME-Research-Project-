@@ -20,7 +20,6 @@ def detect_boats(image):
     colors = np.random.uniform(0, 255, size=(len(classes), 3))
 
     # load our serialized model from disk
-    print("[INFO] loading model...")
     net = cv2.dnn.readNetFromCaffe(protext, model)
 
     # load the input image and construct an input blob for the image
@@ -32,7 +31,6 @@ def detect_boats(image):
 
     # pass the blob through the network and obtain the detections and
 	# predictions
-    print("[INFO] computing object detections...")
     net.setInput(blob)
     detections = net.forward()
 
@@ -59,10 +57,8 @@ def detect_boats(image):
             boats.append(boat)
 
             # display the prediction
-            label = "{}: {:.2f}%".format(classes[idx], confidence * 100.0)
-            print("[INFO] {}".format(label))
-            cv2.rectangle(image, (startX, startY), (endX, endY),
-				colors[idx], 2)
+            label = "{} {}: {:.2f}%".format(classes[idx], i+1, confidence * 100.0)
+            cv2.rectangle(image, (startX, startY), (endX, endY), colors[idx], 2)
             y = startY - 15 if startY - 15 > 15 else startY + 15
             cv2.putText(image, label, (startX, y),
 			    cv2.FONT_HERSHEY_SIMPLEX, 0.5, colors[idx], 2)

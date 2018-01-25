@@ -6,7 +6,7 @@ def slope(p1, p2):
     m = float(0)
     if p2[0]-p1[0] != 0:
         m = float((p2[1]-p1[1])/(p2[0]-p1[0]))
-        #m = math.ceil(m * 100) / 100
+        m = math.ceil(m * 1000) / 1000
     return m
 
 
