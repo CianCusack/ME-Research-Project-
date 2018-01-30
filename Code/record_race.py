@@ -1,12 +1,13 @@
-import cv2
 from Buoy_Detection import *
-from train_haar_cascaade import *
-from motion_detection import *
-from boat_detector import *
-from imutils import contours
-from line_crossing import *
-import time
 import math
+import time
+
+from imutils import contours
+
+from Buoy_Detection import *
+from boat_detector import *
+from line_crossing import *
+
 
 def setup(cam):
     ## Show user first frame and have them select the buoy
