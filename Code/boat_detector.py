@@ -17,7 +17,6 @@ def detect_boats(image):
 		"bottle", "bus", "car", "cat", "chair", "cow", "dining table",
 		"dog", "horse", "motorbike", "person", "potted plant", "sheep",
 		"sofa", "train", "tv monitor"]
-    colors = np.random.uniform(0, 255, size=(len(classes), 3))
 
     # load our serialized model from disk
     net = cv2.dnn.readNetFromCaffe(protext, model)
@@ -58,11 +57,11 @@ def detect_boats(image):
 
             # display the prediction
             label = "{} {}: {:.2f}%".format(classes[idx], i+1, confidence * 100.0)
-            cv2.rectangle(image, (startX, startY), (endX, endY), colors[idx], 2)
+            cv2.rectangle(image, (startX, startY), (endX, endY), (0,0,255), 2)
             y = startY - 15 if startY - 15 > 15 else startY + 15
             cv2.putText(image, label, (startX, y),
-			    cv2.FONT_HERSHEY_SIMPLEX, 0.5, colors[idx], 2)
+			    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 2)
 
     # show the output image
-    cv2.imshow("Output", image)
+    #cv2.imshow("Output", image)
     return boats, coords

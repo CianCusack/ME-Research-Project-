@@ -6,43 +6,60 @@ from boat_detector import *
 from imutils import contours
 from line_crossing import *
 import time
+import math
 
-def read_video():
+def setup(cam):
+    display = cv2.namedWindow('image')
+    cv2.setMouseCallback('image', buoy_points)
+    ver, first = cam.read()
+    cv2.imshow('image', first)
+    cv2.waitKey(3000)
+    cv2.destroyWindow('image')
+
+
+def record_race():
+    #Choose camera
     #cam = cv2.VideoCapture(0)
     #cam = cv2.VideoCapture('../res/sailing.mov')
     #cam = cv2.VideoCapture('../res/olympic_sailing_short.mp4')
     #cam = cv2.VideoCapture('../res/new_race.mov')
     cam = cv2.VideoCapture('../res/KishRace6BoatCloseShort.mp4')
-    display = cv2.namedWindow('image')
-    cv2.setMouseCallback('image', buoy_points)
-    ver, first = cam.read()
-    #first = imutils.rotate(first, 90)
-    cv2.imshow('image', first)
-    cv2.waitKey(3000)
-    cv2.destroyWindow('image')
+
+    setup(cam)
+
+    #Buoy is initially unknown
     buoy = []
-    boats = []
     counter = 0
+    #First frame has already been read in setup
     frame_counter = 1
-    boat_count_spacer = 0
     last_x1, last_y1, last_x2, last_y2 = 0.00, 0.00, 0.00, 0.00
+
+    file = open('../res/finishes.txt', "w")
+    time_to_start = 1  # input('How long until the race begins in minutes?')
+    #Start time of video reading
     t0 = time.time()
-    filename = '../res/finishes.txt'
-    file = open(filename, "w")
+    #Read camera input until finished
     while True:
         ret, frame = cam.read()
         if not ret:
             break
+
+        #Check if race has begun
+        if math.ceil((time.time()-t0)) == time_to_start*60:
+            print 'Go!'
         #Buoy
-        #Only do operations every nth frame
+        #Only do operations every nth frame - attempt to improve performance
         if frame_counter % 25 != 0:
-            w,h = frame.shape[:2]
             buoy_x1, buoy_y1, buoy_x2, buoy_y2, buoy = track_buoy(frame.copy(), buoy)
+            # Assuming that the center of the camera/video is one end of start/finish line
+            w,h = frame.shape[:2]
             m = slope((w/2, h), (buoy_x1, buoy_y2))
+            """
+                ***** Revisit this solution especially concerning max buoy size
+            """
             max_buoy_width = max_buoy_height = 60
             if buoy_x1 != 0 and buoy_y1 != 0:
                 if(abs(buoy_x1 - last_x1) <= max_buoy_width and abs(buoy_y1 - last_y1) <= max_buoy_height) or last_y1 == 0:
-                    w,h = frame.shape[:2]
                     cv2.rectangle(frame, (int(buoy_x1), int(buoy_y1)), (int(buoy_x2), int(buoy_y2)), (0,255,0), 1)
                     cv2.line(frame, (w / 2, h), (int(buoy_x1), int(buoy_y2)), (0, 0, 255), 1)
                     last_x1, last_y1, last_x2, last_y2 = buoy_x1, buoy_y1, buoy_x2, buoy_y2
@@ -53,35 +70,42 @@ def read_video():
                     last_y1 = 0
 
             #Boats
-            # boats = use_cascade(frame.copy())
-
             boats, coords = detect_boats(frame)
 
+            for i, c in enumerate(coords):
 
-            if boats != []:
-                for i, c in enumerate(coords):
-                    # bottom_left = (c[0], c[3])
-                    # bottom_right = (c[2], c[3])
-                    # top_middle = (c[0]+(c[2] - c[0])/2, c[1])
-                    # cv2.circle(frame, (bottom_left), 2, (255, 0, 0), 2)
-                    # cv2.circle(frame, (top_middle), 2, (255, 0, 0), 2)
-                    # cv2.circle(frame, (bottom_right), 2, (255, 0, 0), 2)
-                    # cv2.line(frame, bottom_left, top_middle, (0, 0, 255))
-                    # cv2.line(frame, top_middle, bottom_right, (0, 0, 255))
-                    # cv2.line(frame, bottom_left, bottom_right, (0, 0, 255))
-                    y_points = np.arange(c[1], c[3], 0.01)
-                    for p in y_points:
-                        if p > buoy_y1:
-                            m1 = slope((c[2], p), (buoy_x1, buoy_y2))
-                            #print 'line slope: {}, boat {} slope: {} for ({},{})'.format(m, i+1, m1, c[2], p)
-                            if m1 == m:
-                                cv2.putText(frame, "Intersection", (100, 100),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,100), 2)
-                                cv2.imwrite('../res/Screen-Shots/line_crossing.png', frame)
-                                file.write('Boat {} finished at{} \n'.format(i, time.time() - t0))
-                                #exit(1)
-            #         boat_copy = locate_numbers(boat)
-                #cv2.imshow("boat", boat)
+                ##Draw rough triangle around boats
+                # bottom_left = (c[0], c[3])
+                # bottom_right = (c[2], c[3])
+                # top_middle = (c[0]+(c[2] - c[0])/2, c[1])
+                # cv2.circle(frame, (bottom_left), 2, (255, 0, 0), 2)
+                # cv2.circle(frame, (top_middle), 2, (255, 0, 0), 2)
+                # cv2.circle(frame, (bottom_right), 2, (255, 0, 0), 2)
+                # cv2.line(frame, bottom_left, top_middle, (0, 0, 255))
+                # cv2.line(frame, top_middle, bottom_right, (0, 0, 255))
+                # cv2.line(frame, bottom_left, bottom_right, (0, 0, 255))
+
+                """
+                    Creates array of points along the rightmost edge of the boat bounding box
+                    if the point has the same slope to the buoy as the finish line then it is 
+                    at the finish line and will records as point of intersection
+                """
+                y_points = np.arange(c[1], c[3], 0.01)
+                for p in y_points:
+                    if p > buoy_y1:
+                        m1 = slope((c[2], p), (buoy_x1, buoy_y2))
+                        if m1 == m:
+                            cv2.putText(frame, "Intersection", (100, 100),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,100), 2)
+                            cv2.circle(frame, (c[2],int(p)),2, (255,0,0), 2)
+                            cv2.imwrite('../res/Screen-Shots/line_crossing.png', frame)
+                            file.write('Boat {} finished at{} \n'.format(i, time.time() - t0))
+
+            ## Detect sail numbers
+            # for b in boats:
+            #     if not b:
+            #         boat_copy = locate_numbers(b)
+            #         cv2.imshow("boat", boat_copy)
         cv2.imshow('image', frame)
         cv2.waitKey(1)
         frame_counter += 1
@@ -89,6 +113,8 @@ def read_video():
     file.close()
 
 def locate_numbers(boat):
+    if boat == []:
+        return
     sensitivity = 100
     lower_white = np.array([0, 0, 255 - sensitivity])
     upper_white = np.array([255, sensitivity, 255])

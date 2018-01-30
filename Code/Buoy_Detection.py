@@ -101,16 +101,16 @@ def track_buoy(frame, buoy = []):
             hsv = cv2.cvtColor(buoy, cv2.COLOR_BGR2HSV)
             mask = cv2.inRange(hsv, lower_bound, upper_bound)
             res = cv2.bitwise_and(buoy, buoy, mask=mask)
-            cv2.imshow('Detected buoy', buoy)
-            cv2.imshow('masked buoy', res)
-            cv2.imshow('Mask', mask)
+            #cv2.imshow('Detected buoy', buoy)
+            #cv2.imshow('masked buoy', res)
+            #cv2.imshow('Mask', mask)
             # ***** Only for debugging *****
             count+=1
         #Frame
         hsv = cv2.cvtColor(frame.copy(), cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv, lower_bound, upper_bound)
         masked_frame = cv2.bitwise_and(frame.copy(), frame.copy(), mask=mask)
-        cv2.imshow('Frame mask', masked_frame)
+        #cv2.imshow('Frame mask', masked_frame)
 
         #returns bounding points of buoy
         #x1, y1, x2, y2 = match_features(res, masked_frame, last_x1, last_y1, last_x2, last_y2)

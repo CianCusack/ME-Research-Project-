@@ -31,8 +31,8 @@ def match_template(img, template, bounds):
             mask = cv2.inRange(hsv, bounds[0], bounds[1])
 
         res_img = cv2.bitwise_and(img3, img3, mask=mask)
-        cv2.imshow('res_template buoy', res_template)
-        cv2.imshow('res_img buoy', res_img)
+        #cv2.imshow('res_template buoy', res_template)
+        #cv2.imshow('res_img buoy', res_img)
         if match_features(res_template, res_img):
             return x1,y1,x2,y2
         else:

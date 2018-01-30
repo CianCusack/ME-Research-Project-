@@ -40,7 +40,7 @@ def match_features(img1, img2):
 
 
         cv2.rectangle(img4, (int(x_min), int(y_min)), (int(x_max), int(y_max)), (0,255,0))
-        cv2.imshow('match', img4)
+        #cv2.imshow('match', img4)
         cv2.waitKey(1)
         return True
     #if  x_max == 0 and x_min == 1280 and y_max == 0 and y_min == 720:
