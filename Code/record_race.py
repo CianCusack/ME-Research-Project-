@@ -9,6 +9,7 @@ import time
 import math
 
 def setup(cam):
+    ## Show user first frame and have them select the buoy
     display = cv2.namedWindow('image')
     cv2.setMouseCallback('image', buoy_points)
     ver, first = cam.read()
@@ -43,11 +44,11 @@ def record_race():
         ret, frame = cam.read()
         if not ret:
             break
-
         #Check if race has begun
         if math.ceil((time.time()-t0)) == time_to_start*60:
             print 'Go!'
-        #Buoy
+
+        """**********Buoy*********"""
         #Only do operations every nth frame - attempt to improve performance
         if frame_counter % 25 != 0:
             buoy_x1, buoy_y1, buoy_x2, buoy_y2, buoy = track_buoy(frame.copy(), buoy)
@@ -69,7 +70,7 @@ def record_race():
                 if counter > 10:
                     last_y1 = 0
 
-            #Boats
+            """**********Boats*********"""
             boats, coords = detect_boats(frame)
 
             for i, c in enumerate(coords):
@@ -92,6 +93,7 @@ def record_race():
                 """
                 y_points = np.arange(c[1], c[3], 0.01)
                 for p in y_points:
+                    #Ignore points beyond the buoy for the moment
                     if p > buoy_y1:
                         m1 = slope((c[2], p), (buoy_x1, buoy_y2))
                         if m1 == m:
@@ -113,14 +115,13 @@ def record_race():
     file.close()
 
 def locate_numbers(boat):
-    if boat == []:
-        return
-    sensitivity = 100
-    lower_white = np.array([0, 0, 255 - sensitivity])
-    upper_white = np.array([255, sensitivity, 255])
+
+    lower_white = np.array([0, 0, 255 - 100])
+    upper_white = np.array([255, 100, 255])
     (h, w) = boat.shape[:2]
-    boat_copy = boat.copy()
+    ## Sail numbers normally in the middle third of the boat
     boat = boat[h / 3:(2 * h) / 3, 0:w]
+
     hsv = cv2.cvtColor(boat, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, lower_white, upper_white)
     # Bitwise-AND mask and original image
@@ -130,27 +131,32 @@ def locate_numbers(boat):
     _, cnts, _ = cv2.findContours(boat.copy(), cv2.RETR_LIST,
                                   cv2.CHAIN_APPROX_SIMPLE)
 
+    #Sort contours from left to right
     cnts = contours.sort_contours(cnts, method="left-to-right")[0]
     rois = []
     for c in cnts:
         if cv2.contourArea(c) > 100 or cv2.contourArea(c) < 50:
             continue
         x, y, w, h = cv2.boundingRect(c)
-        # draw the book contour (in green)
+        # region of interest is only within the contours
         roi = boat[y:y + h, x:x + w].copy()
         roi = cv2.resize(roi, (200, 75))
+        ## Convert from gray to hsv and back to gray to get the hsv for masking
         roi = cv2.cvtColor(roi, cv2.COLOR_GRAY2BGR)
         hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
         roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+        ## Sail numbers usually black or red - black in this case
         lower_black = np.array([0, 0, 0])
         upper_black = np.array([0, 100, 100])
         mask = cv2.inRange(hsv, lower_black, upper_black)
         roi = cv2.bitwise_and(roi, roi, mask=mask)
-        # roi = cv2.Canny(roi, 10, 30)
+        ##Store current roi in array of regions of interest
         rois.append(roi)
-        cv2.rectangle(boat_copy, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        cv2.drawContours(boat_copy, c, -1, (0, 255, 0), 1)
+        ## Drawing here merely for clarity can be removed in future
+        cv2.rectangle(boat, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        cv2.drawContours(boat, c, -1, (0, 255, 0), 1)
 
+    ## Shows the regions of interest for half a second each
     i = 0
     for roi in rois:
         cv2.imshow("roi {}".format(i), roi)
@@ -159,4 +165,4 @@ def locate_numbers(boat):
     while i >= 0:
         cv2.destroyWindow("roi {}".format(i))
         i -= 1
-    return boat_copy
+    return boat
