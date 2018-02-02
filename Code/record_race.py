@@ -55,7 +55,8 @@ def record_race():
         if frame_counter % 25 != 0:
             buoy_x1, buoy_y1, buoy_x2, buoy_y2, buoy = track_buoy(frame.copy(), buoy)
             if (buoy_x1 == 0.0) and (buoy_y1 == 0.0):
-                track_buoy_by_colour(frame)
+                lower, upper = get_colour('red')
+                track_buoy_by_colour(frame, lower, upper)
             # Assuming that the center of the camera/video is one end of start/finish line
             w,h = frame.shape[:2]
             m = slope((w/2, h), (buoy_x1, buoy_y2))
@@ -75,37 +76,39 @@ def record_race():
             #         last_y1 = 0
 
             """**********Boats*********"""
-            # boats, coords = detect_boats(frame)
-            #
-            # for i, c in enumerate(coords):
-            #
-            #     ##Draw rough triangle around boats
-            #     # bottom_left = (c[0], c[3])
-            #     # bottom_right = (c[2], c[3])
-            #     # top_middle = (c[0]+(c[2] - c[0])/2, c[1])
-            #     # cv2.circle(frame, (bottom_left), 2, (255, 0, 0), 2)
-            #     # cv2.circle(frame, (top_middle), 2, (255, 0, 0), 2)
-            #     # cv2.circle(frame, (bottom_right), 2, (255, 0, 0), 2)
-            #     # cv2.line(frame, bottom_left, top_middle, (0, 0, 255))
-            #     # cv2.line(frame, top_middle, bottom_right, (0, 0, 255))
-            #     # cv2.line(frame, bottom_left, bottom_right, (0, 0, 255))
-            #
-            #     """
-            #         Creates array of points along the rightmost edge of the boat bounding box
-            #         if the point has the same slope to the buoy as the finish line then it is
-            #         at the finish line and will records as point of intersection
-            #     """
-            #     y_points = np.arange(c[1], c[3], 0.01)
-            #     for p in y_points:
-            #         #Ignore points beyond the buoy for the moment
-            #         if p > buoy_y1:
-            #             m1 = slope((c[2], p), (buoy_x1, buoy_y2))
-            #             if m1 == m:
-            #                 cv2.putText(frame, "Intersection", (100, 100),
-            #         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,100), 2)
-            #                 cv2.circle(frame, (c[2],int(p)),2, (255,0,0), 2)
-            #                 cv2.imwrite('../res/Screen-Shots/line_crossing.png', frame)
-            #                 file.write('Boat {} finished at{} \n'.format(i, time.time() - t0))
+            boats, coords = detect_boats(frame)
+
+
+            for i, c in enumerate(coords):
+                test = frame[c[1]:c[3], c[0]:c[2]]
+                cv2.imwrite('../res/test/test{}.png'.format(i), test)
+                ##Draw rough triangle around boats
+                # bottom_left = (c[0], c[3])
+                # bottom_right = (c[2], c[3])
+                # top_middle = (c[0]+(c[2] - c[0])/2, c[1])
+                # cv2.circle(frame, (bottom_left), 2, (255, 0, 0), 2)
+                # cv2.circle(frame, (top_middle), 2, (255, 0, 0), 2)
+                # cv2.circle(frame, (bottom_right), 2, (255, 0, 0), 2)
+                # cv2.line(frame, bottom_left, top_middle, (0, 0, 255))
+                # cv2.line(frame, top_middle, bottom_right, (0, 0, 255))
+                # cv2.line(frame, bottom_left, bottom_right, (0, 0, 255))
+
+                """
+                    Creates array of points along the rightmost edge of the boat bounding box
+                    if the point has the same slope to the buoy as the finish line then it is
+                    at the finish line and will records as point of intersection
+                """
+                y_points = np.arange(c[1], c[3], 0.01)
+                for p in y_points:
+                    #Ignore points beyond the buoy for the moment
+                    if p > buoy_y1:
+                        m1 = slope((c[2], p), (buoy_x1, buoy_y2))
+                        if m1 == m:
+                            cv2.putText(frame, "Intersection", (100, 100),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,100), 2)
+                            cv2.circle(frame, (c[2],int(p)),2, (255,0,0), 2)
+                            cv2.imwrite('../res/Screen-Shots/line_crossing.png', frame)
+                            file.write('Boat {} finished at{} \n'.format(i, time.time() - t0))
 
             ## Detect sail numbers
             # for b in boats:
@@ -170,3 +173,17 @@ def locate_numbers(boat):
         cv2.destroyWindow("roi {}".format(i))
         i -= 1
     return boat
+
+
+def get_colour(colour):
+    if colour == 'red':
+        lower_bound = np.array([0, 0, 50])
+        upper_bound = np.array([50, 50, 255])
+    elif colour == 'white':
+        lower_bound = np.array([0, 0, 50])
+        upper_bound = np.array([50, 50, 255])
+    else:
+        lower_bound = np.array([0, 0, 0])
+        upper_bound = np.array([255, 255, 255])
+
+    return lower_bound, upper_bound
