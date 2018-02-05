@@ -1,28 +1,36 @@
 import cv2
-import imutils
+import numpy as np
 
-# image = cv2.imread("../res/boat.jpg")
-# grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-# ret, thresh = cv2.threshold(grey, 127, 255, 0)
-# cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
-#                         cv2.CHAIN_APPROX_SIMPLE)
-# cnts = cnts[0] if imutils.is_cv2() else cnts[1]
-# cnts = sorted(cnts, key=cv2.contourArea, reverse=True)
-# displayCnt = None
-#
-# # loop over the contours
-# for c in cnts:
-#     # approximate the contour
-#     peri = cv2.arcLength(c, True)
-#     approx = cv2.approxPolyDP(c, 0.02 * peri, True)
-#
-#     # if the contour has four vertices, then we have found
-#     # the thermostat display
-#     if len(approx) == 4:
-#         displayCnt = approx
-#         break
-# warped = four_point_transform(gray, displayCnt.reshape(4, 2))
-# output = four_point_transform(image, displayCnt.reshape(4, 2))
-# cv2.imshow("boat", thresh)
-# cv2.waitKey(1000)
+img = cv2.imread('../../res/sail_numbers.jpg')
 
+mser = cv2.MSER_create()
+
+#Resize the image so that MSER can work better
+img = cv2.resize(img, (img.shape[1]*2, img.shape[0]*2))
+
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+vis = img.copy()
+
+
+
+regions = mser.detectRegions(gray)
+hulls = [cv2.convexHull(p.reshape(-1, 1, 2)) for p in regions[0]]
+for p in hulls:
+    temp_x = []
+    temp_y = []
+    for p1 in p:
+        temp_x.append(p1[0][0])
+        temp_y.append(p1[0][1])
+    if (max(temp_x) - (min(temp_x)) < 10 or
+                (max(temp_y)) - min(temp_y)) < 35 or \
+                            (max(temp_x) + max(temp_y)) - (min(temp_x) + min(temp_y)) > 300 or\
+                        max(temp_x) - (min(temp_x)) > 100:
+        continue
+    cv2.rectangle(vis, (min(temp_x), min(temp_y)), (max(temp_x), max(temp_y)), (255, 12, 145), 4)
+
+
+cv2.namedWindow('img', 0)
+cv2.imshow('img', vis)
+while(cv2.waitKey()!=ord('q')):
+    continue
+cv2.destroyAllWindows()
