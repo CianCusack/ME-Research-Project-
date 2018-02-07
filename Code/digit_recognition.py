@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-img = cv2.imread('../../res/sail_numbers.jpg')
+img = cv2.imread('../res/sail_numbers.jpg')
 
 mser = cv2.MSER_create()
 
@@ -15,6 +15,7 @@ vis = img.copy()
 
 regions = mser.detectRegions(gray)
 hulls = [cv2.convexHull(p.reshape(-1, 1, 2)) for p in regions[0]]
+i = 0
 for p in hulls:
     temp_x = []
     temp_y = []
@@ -26,11 +27,13 @@ for p in hulls:
                             (max(temp_x) + max(temp_y)) - (min(temp_x) + min(temp_y)) > 300 or\
                         max(temp_x) - (min(temp_x)) > 100:
         continue
-    cv2.rectangle(vis, (min(temp_x), min(temp_y)), (max(temp_x), max(temp_y)), (255, 12, 145), 4)
 
+    #cv2.rectangle(vis, (min(temp_x), min(temp_y)), (max(temp_x), max(temp_y)), (255, 12, 145), 4)
+    cv2.imwrite('../res/Sail Numbers/{}.png'.format(i), vis[min(temp_y):max(temp_y), min(temp_x):max(temp_x)])
+    i += 1
 
 cv2.namedWindow('img', 0)
 cv2.imshow('img', vis)
-while(cv2.waitKey()!=ord('q')):
-    continue
 cv2.destroyAllWindows()
+
+
