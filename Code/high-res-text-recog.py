@@ -52,15 +52,15 @@ for img in imgs:
         missed_imgs.append(img)
 
 images_and_labels = list(zip(found_imgs, predictions))
-for index, (image, label) in enumerate(images_and_labels[:4]):
+for index, (image, label) in enumerate(images_and_labels):
     plt.subplot(3, 9, index + 10)
     plt.axis('off')
     plt.imshow(image, cmap=plt.cm.gray_r, interpolation='nearest')
     plt.title('Prediction: {}'.format(predictions[index]))
 
 images_and_labels = list(zip(missed_imgs, missed))
-for index, (image, label) in enumerate(images_and_labels[:4]):
-    plt.subplot(3, 9, index + 15)
+for index, (image, label) in enumerate(images_and_labels):
+    plt.subplot(3, 9, index + 19)
     plt.axis('off')
     plt.imshow(image, cmap=plt.cm.gray_r, interpolation='nearest')
     plt.title('Missed {}'.format(missed[index]))

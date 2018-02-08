@@ -12,8 +12,8 @@ img = cv2.imread('detection.png', cv2.CV_8UC1)
 #img = 255-img
 #gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 adaptive_gray = cv2.medianBlur(img,5)
-#blurred = cv2.GaussianBlur(gray, (11,11), 0)
-#thresh = cv2.threshold(gray, 194, 15, cv2.THRESH_BINARY_INV)[1]
+#blurred = cv2.GaussianBlur(gray, (11,11), 0)thresh = cv2.threshold(gray, 194, 15, cv2.THRESH_BINARY_INV)[1]
+#
 thresh = cv2.adaptiveThreshold(adaptive_gray,15, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 115, 1)
 
 thresh = cv2.erode(thresh, None, iterations=2)
