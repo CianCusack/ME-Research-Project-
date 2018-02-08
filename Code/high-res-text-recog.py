@@ -4,8 +4,8 @@ import glob
 import numpy as np
 from sklearn import datasets, svm
 
+#Train
 digits = datasets.load_digits()
-
 images_and_labels = list(zip(digits.images, digits.target))
 for index, (image, label) in enumerate(images_and_labels[:9]):
     plt.subplot(3, 9, index + 1)
@@ -15,18 +15,16 @@ for index, (image, label) in enumerate(images_and_labels[:9]):
 
 n_samples = len(digits.images)
 data = digits.images.reshape((n_samples, -1))
-
 classifier = svm.SVC(gamma=0.001)
+classifier.fit(data, digits.target)
 
-classifier.fit(data[:n_samples], digits.target[:n_samples])
-
-# Now predict the value of the digit on the second half:
-#img = cv2.imread('../res/Sail Numbers/92.png')
-
+#Predict
 filenames = [glob.glob("../res/test_data/*.png")]
 filenames.sort()
 filenames = [name.replace('"\"','/') for name in filenames[0]]
 imgs = [cv2.imread(img) for img in filenames]
+#imgs = [cv2.threshold(img, 128, 255, cv2.THRESH_BINARY_INV)[1] for img in imgs]
+
 predictions = []
 found_imgs = []
 missed = []

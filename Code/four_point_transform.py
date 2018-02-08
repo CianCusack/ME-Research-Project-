@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-img = cv2.imread('../res/test_data/8.png')
+img = cv2.imread('../res/test_data/6.png')
 w,h = img.shape[:2]
 img = cv2.resize(img, (400, 400))
 gray = cv2.cvtColor(img.copy(), cv2.COLOR_BGR2GRAY)
@@ -65,14 +65,14 @@ dst = cv2.warpPerspective(img,M,(400,400))
 row, col= dst.shape[:2]
 bottom= dst[row-2:row, 0:col]
 
-bordersize=18
+bordersize=15
 dst=cv2.copyMakeBorder(dst, top=bordersize, bottom=bordersize, left=bordersize, right=bordersize, borderType= cv2.BORDER_CONSTANT, value=[220,220,220] )
 
-# plt.subplot(121),plt.imshow(img),plt.title('Input')
-# plt.subplot(122),plt.imshow(dst),plt.title('Output')
-# plt.show()
+plt.subplot(121),plt.imshow(img),plt.title('Input')
+plt.subplot(122),plt.imshow(dst),plt.title('Output')
+plt.show()
 
 dst = cv2.resize(dst, (w,h))
-cv2.imwrite('../res/test_data/8_rotated.png', dst)
+cv2.imwrite('../res/test_data/6_rotated.png', dst)
 #cv2.imshow('img', img)
 key = cv2.waitKey(10000)
