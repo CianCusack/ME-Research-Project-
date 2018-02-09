@@ -2,13 +2,15 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-img = cv2.imread('../res/test_data/6.png')
+#process image and find contours
+img = cv2.imread('../res/test_data/3.png')
 w,h = img.shape[:2]
 img = cv2.resize(img, (400, 400))
 gray = cv2.cvtColor(img.copy(), cv2.COLOR_BGR2GRAY)
 thresh = cv2.threshold(gray, 128, 255, cv2.THRESH_BINARY_INV)[1]
 _, cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
                                           cv2.THRESH_BINARY_INV)
+
 for c in cnts:
     temp_x = []
     temp_y = []
@@ -73,6 +75,6 @@ plt.subplot(122),plt.imshow(dst),plt.title('Output')
 plt.show()
 
 dst = cv2.resize(dst, (w,h))
-cv2.imwrite('../res/test_data/6_rotated.png', dst)
+cv2.imwrite('../res/test_data/3_rotated.png', dst)
 #cv2.imshow('img', img)
 key = cv2.waitKey(10000)

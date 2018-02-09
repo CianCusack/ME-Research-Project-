@@ -28,12 +28,13 @@ for p in hulls:
                         max(temp_x) - (min(temp_x)) > 100:
         continue
 
-    #cv2.rectangle(vis, (min(temp_x), min(temp_y)), (max(temp_x), max(temp_y)), (255, 12, 145), 4)
-    cv2.imwrite('../res/Sail Numbers/{}.png'.format(i), vis[min(temp_y):max(temp_y), min(temp_x):max(temp_x)])
+    cv2.rectangle(vis, (min(temp_x), min(temp_y)), (max(temp_x), max(temp_y)), (255, 12, 145), 4)
+    #cv2.imwrite('../res/Sail Numbers/{}.png'.format(i), vis[min(temp_y):max(temp_y), min(temp_x):max(temp_x)])
     i += 1
 
 cv2.namedWindow('img', 0)
 cv2.imshow('img', vis)
+cv2.imwrite('../res/sail_numbers_noise.png', vis)
 cv2.destroyAllWindows()
 
 

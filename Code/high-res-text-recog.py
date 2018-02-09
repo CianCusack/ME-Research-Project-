@@ -61,7 +61,7 @@ for index, (image, label) in enumerate(images_and_labels):
     plt.subplot(3, 9, index + 19)
     plt.axis('off')
     plt.imshow(image, cmap=plt.cm.gray_r, interpolation='nearest')
-    plt.title('Missed {}'.format(missed[index]))
+    plt.title('Missed')
 
 
 

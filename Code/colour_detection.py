@@ -8,7 +8,6 @@ def track_buoy_by_colour(frame, lower_bound, upper_bound):
     mask = cv2.inRange(frame, lower_bound, upper_bound)
     mask = cv2.erode(mask, None, iterations=2)
     mask = cv2.dilate(mask, None, iterations=2)
-    cv2.imshow('mask', mask)
 
     _, contours, _ = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
                             cv2.CHAIN_APPROX_SIMPLE)
@@ -28,7 +27,6 @@ def track_objects_by_colour(frame, lower_bound, upper_bound):
         mask = cv2.inRange(frame.copy(), lower_bound, upper_bound)
         mask = cv2.erode(mask, None, iterations=2)
         mask = cv2.dilate(mask, None, iterations=2)
-        cv2.imshow('mask', mask)
 
         _, contours, _ = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
                                           cv2.THRESH_BINARY_INV)
@@ -49,34 +47,33 @@ def track_objects_by_colour_experimental(frame, lower_bound, upper_bound):
     mask = cv2.erode(mask, None, iterations=2)
     mask = cv2.dilate(mask, None, iterations=2)
     mask = cv2.resize(mask, (400, 400))
-    cv2.imshow('mask', mask)
 
     _, contours, _ = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
                                       cv2.THRESH_BINARY_INV)
 
 
-cam = cv2.VideoCapture(0)
-#cam = cv2.VideoCapture('../res/new_race.mov')
-#cam = cv2.VideoCapture('../res/sailing.mov')
-#cam = cv2.VideoCapture('../res/KishRace1.mp4')
-cam = cv2.VideoCapture('../res/new_race_1.mov')
-red = np.uint8([[[0,0,20]]])
-light_red = np.uint8([[[150,150,255]]])
-lower_bound = cv2.cvtColor(red, cv2.COLOR_BGR2HSV)
-upper_bound = cv2.cvtColor(light_red, cv2.COLOR_BGR2HSV)
-lower_bound = np.array([0, 0, 20])
-upper_bound = np.array([100, 100, 255])
-while True:
-
-    ret, frame = cam.read()
-    if not ret:
-        break
-    frame = cv2.imread('../res/High-Res Boats At A Distance/boats.jpg')
-    frame = cv2.imread('../res//sail_numbers.jpg')
-    #frame = cv2.resize(frame, (400,400))
-    w, h = frame.shape[:2]
-    #frame = frame[int((h*3)/4):h, 0:w]
-    track_buoy_by_colour(frame, lower_bound, upper_bound)
-    frame = cv2.resize(frame, (400,400))
-    cv2.imshow('frame', frame)
-    cv2.waitKey(50)
+# cam = cv2.VideoCapture(0)
+# #cam = cv2.VideoCapture('../res/new_race.mov')
+# #cam = cv2.VideoCapture('../res/sailing.mov')
+# #cam = cv2.VideoCapture('../res/KishRace1.mp4')
+# cam = cv2.VideoCapture('../res/new_race_1.mov')
+# red = np.uint8([[[0,0,20]]])
+# light_red = np.uint8([[[150,150,255]]])
+# lower_bound = cv2.cvtColor(red, cv2.COLOR_BGR2HSV)
+# upper_bound = cv2.cvtColor(light_red, cv2.COLOR_BGR2HSV)
+# lower_bound = np.array([0, 0, 20])
+# upper_bound = np.array([100, 100, 255])
+# while True:
+#
+#     ret, frame = cam.read()
+#     if not ret:
+#         break
+#     frame = cv2.imread('../res/High-Res Boats At A Distance/boats.jpg')
+#     frame = cv2.imread('../res//sail_numbers.jpg')
+#     #frame = cv2.resize(frame, (400,400))
+#     w, h = frame.shape[:2]
+#     #frame = frame[int((h*3)/4):h, 0:w]
+#     track_buoy_by_colour(frame, lower_bound, upper_bound)
+#     frame = cv2.resize(frame, (400,400))
+#     cv2.imshow('frame', frame)
+#     cv2.waitKey(50)
