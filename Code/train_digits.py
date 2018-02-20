@@ -48,64 +48,68 @@ import numpy as np
 import glob
 from matplotlib import pyplot as plt
 
-#######   training part    ###############
-samples = np.loadtxt('generalsamples.data', np.float32)
-responses = np.loadtxt('generalresponses.data', np.float32)
-responses = responses.reshape((responses.size, 1))
+def recognise_digits(imgs):
 
-model = cv2.ml.KNearest_create()
-model.train(samples, cv2.ml.ROW_SAMPLE, responses)
+        # train kNN model
+        samples = np.loadtxt('generalsamples.data', np.float32)
+        responses = np.loadtxt('generalresponses.data', np.float32)
+        responses = responses.reshape((responses.size, 1))
+        model = cv2.ml.KNearest_create()
+        model.train(samples, cv2.ml.ROW_SAMPLE, responses)
 
-############################# testing part  #########################
 
-filenames = [glob.glob("../res/test_data/normal/*.png")]
+        strings = np.array([])
+        found_imgs = np.array([])
+        for img in imgs:
+                gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                thresh = cv2.adaptiveThreshold(gray, 255, 1, 1, 11, 2)
+
+                _,contours, hierarchy = cv2.findContours(thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+
+                results = np.array([])
+                for cnt in contours:
+                        if cv2.contourArea(cnt) > 50:
+                                [x, y, w, h] = cv2.boundingRect(cnt)
+                                if h > 28:
+                                        roi = thresh[y:y + h, x:x + w]
+                                        roismall = cv2.resize(roi, (10, 10))
+                                        roismall = roismall.reshape((1, 100))
+                                        roismall = np.float32(roismall)
+                                        retval, results, neigh_resp, dists = model.findNearest(roismall, k=1)
+                                        value = int((results[0][0]))
+                                        results = np.append(results, value)
+                # If multiple numbers are found in image take number with greatest number of occurrences
+
+                if len(results) > 0:
+                        results = results.astype(int)
+                        strings = np.append(strings, str(np.bincount(results).argmax()))
+                else:
+                        strings = np.append(strings, '')
+        inc = 0
+        print strings
+        # for index, image in enumerate(imgs):
+        #         if(strings[index] == ''):
+        #                 inc += 1
+        #                 continue
+        #         plt.subplot(2, len(strings[strings!=''])/2 +1 , index + 1 - inc)
+        #         plt.axis('off')
+        #         plt.imshow(image, cmap=plt.cm.gray_r, interpolation='nearest')
+        #         plt.title('Predicted {}'.format(strings[index]))
+
+        for index, image in enumerate(imgs):
+                plt.subplot(2, len(strings)/2 +1 , index + 1 - inc)
+                plt.axis('off')
+                plt.imshow(image, cmap=plt.cm.gray_r, interpolation='nearest')
+                plt.title('Predicted {} '.format(strings[index]))
+        plt.show()
+        return strings
+
+
+filenames = [glob.glob("../res/Sail Numbers/*.png")]
 filenames.sort()
 filenames = [name.replace('"\"','/') for name in filenames[0]]
 imgs = [cv2.imread(img) for img in filenames]
-#imgs = [cv2.imread('../res/boat.jpg')]
-strings = np.array([])
-for img in imgs:
-        out = np.zeros(img.shape, np.uint8)
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        thresh = cv2.adaptiveThreshold(gray, 255, 1, 1, 11, 2)
+#imgs = [cv2.resize(img, (30,30)) for img in imgs]
 
-        _,contours, hierarchy = cv2.findContours(thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-
-        results = np.array([], dtype=np.int64)
-        for cnt in contours:
-                if cv2.contourArea(cnt) > 50:
-                        [x, y, w, h] = cv2.boundingRect(cnt)
-                        if h > 28:
-                                #cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                                roi = thresh[y:y + h, x:x + w]
-                                roismall = cv2.resize(roi, (10, 10))
-                                roismall = roismall.reshape((1, 100))
-                                roismall = np.float32(roismall)
-                                retval, results, neigh_resp, dists = model.findNearest(roismall, k=1)
-                                value = int((results[0][0]))
-                                string = str(int((results[0][0])))
-                                #cv2.putText(img, string, (x+w/2, y + h/2), 0, 1, (0, 255, 0))
-                                results = np.append(results, value)
-        if len(results) > 0:
-                results = results.astype(int)
-                strings = np.append(strings, str(np.bincount(results).argmax()))
-
-
-correct = [0,2,3,6,7,8]
-images_and_labels = list(zip(imgs, correct))
-for index, (image, label) in enumerate(images_and_labels):
-    plt.subplot(2, 8, index+1)
-    plt.axis('off')
-    plt.imshow(image, cmap=plt.cm.gray_r, interpolation='nearest')
-    plt.title('Label: {}'.format(correct[index]))
-
-# images_and_labels = list(zip(results, strings))
-for index, (image) in enumerate(strings):
-        out = np.zeros(img.shape, np.uint8)
-        cv2.putText(out, strings[index], (x, y + h / 2), 0, 1, (0, 255, 0))
-        plt.subplot(2, 8, index +9)
-        plt.axis('off')
-        plt.imshow(out, cmap=plt.cm.gray_r, interpolation='nearest')
-        plt.title('Predicted {}'.format(strings[index]))
-
-plt.show()
+digits = recognise_digits(imgs[:10])
+#print digits
