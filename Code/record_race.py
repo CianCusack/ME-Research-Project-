@@ -9,6 +9,7 @@ from boat_detector import *
 from line_crossing import *
 from colour_detection import *
 from boat_coords import *
+from digit_recognition import *
 
 
 def setup(cam):
@@ -84,6 +85,12 @@ def record_race():
             #     continue
 
             img = frame[c[1]:c[3], c[0]:c[2]].copy()
+            cv2.imshow('img', img)
+            cv2.waitKey(0)
+            # h1, w1
+            if(img.shape[1] > 50):
+                cv2.imwrite('../res/boat.png', img)
+                get_sail_number(img)
             if len(img) == 0:
                 continue
             extreme_point = get_extreme_point(img)
