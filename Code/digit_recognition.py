@@ -83,14 +83,71 @@ Text detection with MSER, and fill with random colors for each detection.
 import numpy as np
 import cv2
 from four_point_transform import *
-from recognise_numbers import recognise_digits
+from recognise_numbers import *
 import difflib
 import pandas as pd
 import math
 
+
+def get_sail_number_line(boxes, img):
+    xs = []
+    ys = []
+    hs = []
+    for b in boxes:
+        xs.append(b[0])
+        ys.append(b[1])
+        hs.append(b[3])
+
+    top_line = [0, 0, 0, 0]
+    bottom_line = [0, 0, 0, 0]
+    for b in boxes:
+        if b[0] == min(xs):
+            top_line[0] = (b[0], int(b[1] * 0.975))
+            top_line[1] = (b[0], int((b[1] + b[3]) * 1.025))
+        if b[1] == min(ys):
+            top_line[2] = (b[0] + b[2], int(b[1] * 0.95))
+            top_line[3] = (b[0] + b[2], int((b[1] + b[3]) * 1))
+        if b[0] == max(xs):
+            bottom_line[0] = (b[0] + b[2], int(b[1] * 0.975))
+            bottom_line[1] = (b[0] + b[2], int((b[1] + b[3]) * 1.025))
+        if b[1] == max(ys):
+            bottom_line[2] = (b[0], b[1])
+            bottom_line[3] = (b[0], b[1] + b[3])
+    print top_line
+
+    sail_imgs = []
+    mask = np.zeros(img.shape, dtype=np.uint8)
+    roi_corners = np.array([[(top_line[0]), (top_line[2]), (top_line[3]), (top_line[1])]], dtype=np.int32)
+    ignore_mask_color = (255,) * img.shape[2]
+    cv2.fillPoly(mask, roi_corners, ignore_mask_color)
+
+    img_mask = img[top_line[2][1]:top_line[1][1], top_line[0][0]:top_line[3][0]]
+    mask = mask[top_line[2][1]:top_line[1][1], top_line[0][0]:top_line[3][0]]
+    masked_image = cv2.bitwise_and(img_mask, mask)
+    cv2.imwrite('../res/Sail Numbers/top.png', masked_image)
+    sail_imgs.append(masked_image)
+
+    mask = np.zeros(img.shape, dtype=np.uint8)
+    roi_corners = np.array([[(bottom_line[0]), (bottom_line[2]), (bottom_line[3]), (bottom_line[1])]], dtype=np.int32)
+    ignore_mask_color = (255,) * img.shape[2]
+    cv2.fillPoly(mask, roi_corners, ignore_mask_color)
+
+    img_mask = img[bottom_line[0][1]:bottom_line[3][1], bottom_line[3][0]:bottom_line[0][0]]
+    mask = mask[bottom_line[0][1]:bottom_line[3][1], bottom_line[3][0]:bottom_line[0][0]]
+    masked_image = cv2.bitwise_and(img_mask, mask)
+    cv2.imwrite('../res/Sail Numbers/bottom.png', masked_image)
+    sail_imgs.append(masked_image)
+    cv2.rectangle(img, (top_line[0][0], top_line[0][1]), (top_line[3][0], top_line[3][1]), (0, 0, 255), 2)
+    cv2.rectangle(img, (bottom_line[2][0], bottom_line[2][1]), (bottom_line[1][0], bottom_line[1][1]), (0, 255, 255), 2)
+    # cv2.imshow('vis', img)
+    # cv2.waitKey(0)
+    return sail_imgs
+
 def detect_digits(img):
     h, w = img.shape[:2]
-    img = img[0:3*h/5, 0:w]
+    if h * w < 200:
+        return None, -1
+    #img = img[0:3*h/5, 0:w]
     #img = cv2.resize(img, (w*2, h*2))
     #h, w = img.shape[:2]
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -103,8 +160,10 @@ def detect_digits(img):
     ## Do mser detection, get the coodinates and bboxes
     coordinates, bboxes = mser.detectRegions(gray)
     ## Filter the coordinates
+    coordinates, _ = sort_contours(coordinates, 'top-to-bottom')
     coords = []
     boxes = []
+    angles = []
     i = 0
     for coord in coordinates:
         bbox = cv2.boundingRect(coord)
@@ -113,89 +172,78 @@ def detect_digits(img):
             continue
         coords.append(coord)
         boxes.append(bbox)
-        #cv2.rectangle(img, (int(x),int(y)), (int(x+w1), int(y+h1)), (100,100,100), 1)
-        # rect = cv2.minAreaRect(coord)
+        #cv2.rectangle(img, (int(x),int(y)), (int(x+w1), int(y+h1)), (100,255,100), 1)
+        rect = cv2.minAreaRect(coord)
+        theta =  abs(rect[2]/45)
+        if theta == 0 or theta == 1:
+            continue
+        angles.append(theta)
         #
         # box = cv2.boxPoints(rect)
         #
         # box = np.int0(box)
         #
-        # cv2.drawContours(img, [box], 0, (0, 0, 255), 2)
+        #
+        #
+        # cv2.drawContours(img, [box], 0, (0, 0, 255), 1)
     # cv2.imshow('img', img)
     # cv2.waitKey(0)
+    if len(angles) == 0:
+        return None, -1
+    average_angle =  sum(angles)/len(angles)
     canvas3 = np.zeros([img.shape[0],img.shape[1],3],dtype=np.uint8)
     canvas3[:] = [255, 255, 255] # or img[:] = 255
+    mode = 0
+    # Determine if the angle of the sail numbers is small enough to ignore
+    if 2 - average_angle < 0.8 or 2-average_angle > 1.2:
+        sail_imgs = get_sail_number_line(boxes, img)
+        mode = 1
+    else:
+        xs = []
+        ys = []
+        hs = []
+        ws = []
+        for b in boxes:
+            xs.append(b[0])
+            ys.append(b[1])
+            ws.append(b[2])
+            hs.append(b[3])
 
-    xs = []
-    ys = []
-    hs = []
-    for b in boxes:
-        xs.append(b[0])
-        ys.append(b[1])
-        hs.append(b[3])
-    # iterations = math.ceil(float(max(ys)/min(ys)))
-    # print (min(ys), max(ys), max(hs))
-    # for iter in range(min(ys), max(ys), max(hs)):
-    #     cv2.line(img, (0, iter), (w, iter), (0, 255, 0), 2)
-    # x1 = max(hs)
-    # ys1 = []
-    # for y in ys:
-    #     if y < (min(ys) + x1):
-    #         ys1.append(y)
+        top_xs= []
+        top_ys = []
+        for b in boxes:
+            if b[1] > min(ys) + max(hs):
+                    continue
+            top_xs.append(b[0])
+            top_ys.append(b[1])
+            #cv2.rectangle(img, (b[0], b[1]), (b[0]+b[2], b[1]+b[3]), (255, 0, 0), 2)
+        sail_imgs = [img[min(top_ys): max(top_ys)+max(hs), min(top_xs):max(top_xs)+max(ws)].copy()]
+        cv2.rectangle(img, (min(top_xs), min(top_ys)), (max(top_xs)+ max(ws), max(top_ys)+max(hs)), (255,0,0), 2)
+        # top_line = [0, 0, 0, 0]
+        # bottom_line = [0, 0, 0, 0]
+        # for b in boxes:
+        #     if b[0] == min(xs):
+        #         top_line[0] = (b[0], int(b[1] * 0.975))
+        #         top_line[1] = (b[0], int((b[1] + b[3]) * 1.025))
+        #     if b[1] == min(ys):
+        #         top_line[2] = (b[0] + b[2], int(b[1] * 0.95))
+        #         top_line[3] = (b[0] + b[2], int((b[1] + b[3]) * 1))
+        #         cv2.circle(img, (b[0] + b[2], int((b[1] + b[3]))), 2, (150, 150, 255), 2)
+        #     if b[0] == max(xs):
+        #         bottom_line[0] = (b[0] + b[2], int(b[1] * 0.975))
+        #         bottom_line[1] = (b[0] + b[2], int((b[1] + b[3]) * 1.025))
+        #     if b[1] == max(ys):
+        #         bottom_line[2] = (b[0], b[1])
+        #         bottom_line[3] = (b[0], b[1] + b[3])
+        # print top_line
+        # sail_imgs = [img]
+        #cv2.rectangle(img, (top_line[0][0], top_line[0][1]), (top_line[3][0], top_line[3][1]), (0, 0, 255), 2)
+        #cv2.rectangle(img, (bottom_line[2][0], bottom_line[2][1]), (bottom_line[1][0], bottom_line[1][1]), (0, 255, 255), 2)
 
-
-
-    top_line = [0,0,0,0]
-    bottom_line = [0,0,0,0]
-    for b in boxes:
-        if b[0] == min(xs):
-            top_line[0] = (b[0], int(b[1]*0.975))
-            top_line[1] = (b[0], int((b[1]+b[3])*1.025))
-        if b[1] == min(ys):
-            top_line[2] = (b[0]+b[2], int(b[1]*0.95))
-            top_line[3] = (b[0]+b[2], int((b[1]+b[3])*1))
-        if b[0] == max(xs):
-            bottom_line[0] = (b[0]+b[2], int(b[1]*0.975))
-            bottom_line[1] = (b[0]+b[2], int((b[1]+b[3])*1.025))
-        if b[1] == max(ys):
-            bottom_line[2] = (b[0], b[1])
-            bottom_line[3] = (b[0], b[1]+b[3])
-    print top_line
-
-    #cv2.rectangle(img, (top_line[0][0], top_line[0][1]), (top_line[3][0], top_line[3][1]), (0,0,255), 2)
-    cv2.imshow('img', img)
-    cv2.imwrite('../res/temp.png',img)
-    cv2.waitKey(0)
-    mask = np.zeros(img.shape, dtype=np.uint8)
-    roi_corners = np.array([[(top_line[0]), (top_line[2]), (top_line[3]), (top_line[1])]], dtype=np.int32)
-    # fill the ROI so it doesn't get wiped out when the mask is applied
-    channel_count = img.shape[2]  # i.e. 3 or 4 depending on your image
-    ignore_mask_color = (255,)*channel_count
-    cv2.fillPoly(mask, roi_corners, ignore_mask_color)
-    # from Masterfool: use cv2.fillConvexPoly if you know it's convex
-
-    sail_imgs = []
-    # apply the mask
-    img_mask = img[top_line[2][1]:top_line[1][1], top_line[0][0]:top_line[3][0]]
-    mask = mask[top_line[2][1]:top_line[1][1], top_line[0][0]:top_line[3][0]]
-    masked_image = cv2.bitwise_and(img_mask, mask)
-    cv2.imwrite('../res/Sail Numbers/top.png', masked_image)
-    sail_imgs.append(masked_image)
-
-    mask = np.zeros(img.shape, dtype=np.uint8)
-    roi_corners = np.array([[(bottom_line[0]), (bottom_line[2]), (bottom_line[3]), (bottom_line[1])]], dtype=np.int32)
-    # fill the ROI so it doesn't get wiped out when the mask is applied
-    channel_count = img.shape[2]  # i.e. 3 or 4 depending on your image
-    ignore_mask_color = (255,)*channel_count
-    cv2.fillPoly(mask, roi_corners, ignore_mask_color)
-    # from Masterfool: use cv2.fillConvexPoly if you know it's convex
-    # apply the mask
-    img_mask = img[bottom_line[0][1]:bottom_line[3][1], bottom_line[3][0]:bottom_line[0][0]]
-    mask = mask[bottom_line[0][1]:bottom_line[3][1], bottom_line[3][0]:bottom_line[0][0]]
-    masked_image = cv2.bitwise_and(img_mask, mask)
-    cv2.imwrite('../res/Sail Numbers/bottom.png', masked_image)
-    sail_imgs.append(masked_image)
-    return sail_imgs
+    # for img in sail_imgs:
+    #     cv2.imshow('sail_img', img)
+    #     cv2.waitKey(0)
+    return sail_imgs, mode
 
 
 
@@ -203,22 +251,24 @@ def get_sail_number(img):
     numbers = pd.read_csv('../res/sample sail numbers.csv', dtype={'ID': str})
     nums = [str(num[0]) for num in numbers.values]
 
-    imgs = detect_digits(img)
+    imgs, mode = detect_digits(img)
     # for i, img in enumerate(imgs):
     #     cv2.imshow('{}'.format(i), img)
     # cv2.waitKey(0)
-
-    imgs = four_point_transform(imgs, 0)
+    if mode == 1:
+        imgs = four_point_transform(imgs, 0)
+    if mode == -1 or imgs == None:
+        return
     # for i, img in enumerate(imgs):
     #     cv2.imshow('{}'.format(i), img)
     # cv2.waitKey(0)
     digits = []
     sail_num = []
     for i, img in enumerate(imgs):
-        if i == 0:
+        if i == 0 and mode == 1:
             img = cv2.flip(img, 1)
         digits.append(recognise_digits(img))
-
+    print digits
     # for i in range(0,len(digits[0])):
     #         if digits[0][i] == digits[1][i]:
     #                 sail_num.append(digits[0][i])
@@ -234,12 +284,12 @@ def get_sail_number(img):
     #results.append(difflib.get_close_matches((''.join(sail_num)), nums))
     results.append(difflib.get_close_matches(digits[0], nums))
     #results.append(difflib.get_close_matches(digits[1], nums))
-    print results
+    #print results
     # for result in results:
     #     for r in result:
     #         if len(r) == avg:
     #             print 'The sailing number is {}'.format(r)
 
-img1 = cv2.imread('../res/sail_numbers_cropped.jpg')
-#img1 = cv2.imread('../res/boat.png')
-get_sail_number(img1)
+# img1 = cv2.imread('../res/sail_numbers_cropped_2.jpg')
+# #img1 = cv2.imread('../res/boat.png')
+# get_sail_number(img1)

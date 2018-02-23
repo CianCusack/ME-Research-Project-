@@ -22,6 +22,8 @@ def sort_contours(cnts, method="left-to-right"):
         # bottom
         boundingBoxes = [cv2.boundingRect(c) for c in cnts]
         (cnts, boundingBoxes) = zip(*sorted(zip(cnts, boundingBoxes),
+                                            key=lambda b: b[1][0], reverse=reverse))
+        (cnts, boundingBoxes) = zip(*sorted(zip(cnts, boundingBoxes),
                                             key=lambda b: b[1][i], reverse=reverse))
 
         # return the list of sorted contours and bounding boxes
@@ -41,12 +43,16 @@ def recognise_digits(img):
         images = []
 
         h, w = img.shape[:2]
-
-        img = cv2.resize(img, (w*2, h*2))
+        if h < 30:
+                img = cv2.resize(img, (w*3, h*3))
+        else:
+                img = cv2.resize(img, (w * 2, h * 2))
         gray = cv2.cvtColor(img.copy(), cv2.COLOR_BGR2GRAY)
         _, thresh = cv2.threshold(gray.copy(), 127, 255, cv2.THRESH_BINARY_INV)
         _, contours, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
                                           cv2.THRESH_BINARY_INV)
+        if len(contours) == 0:
+                return ''
         contours , _ = sort_contours(contours)
         for c in contours:
                 if cv2.contourArea(c) < 300:
@@ -59,7 +65,8 @@ def recognise_digits(img):
                         temp_y.append(c1[0][1])
 
                 images.append(img[min(temp_y):max(temp_y), min(temp_x): max(temp_x)].copy())
-
+                # cv2.imshow('img', img[min(temp_y):max(temp_y), min(temp_x): max(temp_x)].copy())
+                # cv2.waitKey(0)
         for img in images:
                 gray = cv2.cvtColor(img.copy(), cv2.COLOR_BGR2GRAY)
                 thresh = cv2.adaptiveThreshold(gray, 255, 1, 1, 11, 2)
@@ -99,13 +106,7 @@ def recognise_digits(img):
                 plt.axis('off')
                 plt.imshow(image, cmap=plt.cm.gray_r, interpolation='nearest')
                 plt.title('Predicted {}'.format(strings[index]))
-
-        for index, image in enumerate(images):
-                plt.subplot(2, len(strings)/2 +1 , index + 1 - inc)
-                plt.axis('off')
-                plt.imshow(image, cmap=plt.cm.gray_r, interpolation='nearest')
-                plt.title('Predicted {} '.format(strings[index]))
-        plt.show()
+        #plt.show()
         return ''.join(strings)
 
 # img = cv2.imread('../res/Sail Numbers/individual/0.png')

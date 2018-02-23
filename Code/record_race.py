@@ -27,8 +27,8 @@ def record_race():
     #cam = cv2.VideoCapture(0)
     #cam = cv2.VideoCapture('../res/sailing.mov')
     #cam = cv2.VideoCapture('../res/olympic_sailing_short.mp4')
-    #cam = cv2.VideoCapture('../res/new_race.mov')
-    cam = cv2.VideoCapture('../res/KishRace6BoatCloseShort.mp4')
+    cam = cv2.VideoCapture('../res/new_race.mov')
+    #cam = cv2.VideoCapture('../res/KishRace6BoatCloseShort.mp4')
 
     setup(cam)
 
@@ -85,8 +85,8 @@ def record_race():
             #     continue
 
             img = frame[c[1]:c[3], c[0]:c[2]].copy()
-            cv2.imshow('img', img)
-            cv2.waitKey(0)
+            # cv2.imshow('img', img)
+            # cv2.waitKey(0)
             # h1, w1
             if(img.shape[1] > 50):
                 cv2.imwrite('../res/boat.png', img)
@@ -152,7 +152,7 @@ def record_race():
             #         cv2.imshow("boat", boat_copy)
         cv2.imshow('image', frame)
         #out.write(frame)
-        cv2.waitKey(50)
+        cv2.waitKey(1)
         frame_counter += 1
         if frame_counter > 550:
             break

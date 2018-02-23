@@ -12,6 +12,8 @@ def four_point_transform(imgs, mode):
         thresh = cv2.threshold(gray, 140, 255, mode)[1]
 
         _, cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,  cv2.THRESH_BINARY_INV)
+        if len(cnts) == 0:
+            return None
         temp_x = []
         temp_y = []
         for c in cnts:
