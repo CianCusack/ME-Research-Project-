@@ -70,8 +70,8 @@ def record_race():
         max_buoy_width = max_buoy_height = 60
         # if buoy_x1 != 0 and buoy_y1 != 0:
         #     if(abs(buoy_x1 - last_x1) <= max_buoy_width and abs(buoy_y1 - last_y1) <= max_buoy_height) or last_y1 == 0:
-        cv2.rectangle(frame, (int(buoy_x1), int(buoy_y1)), (int(buoy_x2), int(buoy_y2)), (0,255,0), 1)
-        cv2.line(frame, (w / 2, h), (int(buoy_x1), int(buoy_y2)), (0, 0, 255), 1)
+        # cv2.rectangle(frame, (int(buoy_x1), int(buoy_y1)), (int(buoy_x2), int(buoy_y2)), (0,255,0), 1)
+        # cv2.line(frame, (w / 2, h), (int(buoy_x1), int(buoy_y2)), (0, 0, 255), 1)
         last_x1, last_y1, last_x2, last_y2 = buoy_x1, buoy_y1, buoy_x2, buoy_y2
         # else:
         #     cv2.putText(frame, "No buoy", (200, 300), cv2.FONT_HERSHEY_COMPLEX_SMALL, 10, (0, 0, 0))
@@ -92,7 +92,7 @@ def record_race():
 
             for i, c in enumerate(coords):
 
-                cv2.rectangle(frame, (c[0], c[1]), (c[2], c[3]), (255, 255, 100), 1)
+                #cv2.rectangle(frame, (c[0], c[1]), (c[2], c[3]), (255, 255, 100), 1)
                 # Initialize tracker with first frame and bounding box
                 t = trackers[i]
                 t.init(frame, (c[0], c[1], c[2], c[3]))
@@ -107,30 +107,27 @@ def record_race():
                     # Tracking success
                     p1 = (int(bbox[0]), int(bbox[1]))
                     p2 = (int(bbox[2]), int(bbox[3]))
-                    cv2.rectangle(frame, p1, p2, (255, 0, 0), 2, 1)
+                    #cv2.rectangle(frame, p1, p2, (255, 0, 0), 2, 1)
                 else:
                     # Tracking failure
                     cv2.putText(frame, "Tracking failure detected", (100, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.75,
                                 (0, 0, 255),
                                 2)
 
-                # Display tracker type on frame
-                cv2.putText(frame, 'KCF' + " Tracker", (100, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50, 170, 50),
-                            2);
-                # Display FPS on frame
-                cv2.putText(frame, "FPS : " + str(frame_counter), (100, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50, 170, 50),
-                            2);
+
                 # cv2.imshow('tracker', frame)
                 # cv2.waitKey(0)
                 if c[0] < 0 or c[2] < 0 or c[1] < 0 or c[3] < 0:
                     continue
                 img = frame[c[1]:c[3], c[0]:c[2]].copy()
-
+                # print img
+                # print c
                 if len(img) == 0:
                     continue
                 extreme_point = get_extreme_point(img)
                 new_point = (extreme_point[0] + c[0], extreme_point[1]+c[1])
-                cv2.circle(frame, new_point, 2, (0,0,255), thickness=1)
+                print new_point
+                cv2.circle(frame, new_point, 5, (0,0,255), thickness=3)
                 points = [(new_point[0]-1, new_point[1]-1),
                           (new_point[0] - 1, new_point[1]),
                           (new_point[0], new_point[1] - 1),
@@ -142,10 +139,9 @@ def record_race():
                     m1 = slope(p, (buoy_x1, buoy_y2))
                     if m1 == m:
                         if(img.shape[1] > 50):
-                            #cv2.imwrite('../res/boat.png', img)
                             get_sail_number(img)
                         cv2.putText(frame, "Intersection", (100, 100),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,100), 2)
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,100), 2)
                         cv2.circle(frame, new_point,2, (255,0,0), 2)
                         cv2.imwrite('../res/Screen-Shots/line_crossing.png', frame)
                         print 'Intersection'
@@ -187,7 +183,15 @@ def record_race():
             #     if not b:
             #         boat_copy = locate_numbers(b)
             #         cv2.imshow("boat", boat_copy)
+        cv2.rectangle(frame, (int(buoy_x1), int(buoy_y1)), (int(buoy_x2), int(buoy_y2)), (0, 255, 0), 1)
+        cv2.line(frame, (w / 2, h), (int(buoy_x1), int(buoy_y2)), (0, 0, 255), 1)
         cv2.putText(frame, "TIME : " + str(round(time.time() - t0, 2)), (100, 110), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50, 170, 50),
+                    2);
+        # Display tracker type on frame
+        cv2.putText(frame, 'Median Flow' + " Tracker", (100, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50, 170, 50),
+                    2);
+        # Display FPS on frame
+        cv2.putText(frame, "FPS : " + str(frame_counter), (100, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50, 170, 50),
                     2);
         cv2.imshow('image', frame)
         #out.write(frame)
