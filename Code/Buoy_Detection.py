@@ -43,16 +43,18 @@ def track_buoy(frame, buoy = []):
 """
     This formula needs to updated to be more accurate
 """
+# def calc_range(distance):
+#     size = 20
+#     if distance > (2.5*size):
+#         if distance > (size * 5):
+#             return int(size - 1.5 * (distance / size))
+#         return int(size-4*(distance/size))
+#
+#     else:
+#         return int(1.5*size)
 def calc_range(distance):
-    size = 20
-    if distance > (2.5*size):
-        if distance > (size * 5):
-            return int(size - 1.5 * (distance / size))
-        return int(size-4*(distance/size))
-
-    else:
-        return int(1.5*size)
-
+    size = 5000
+    return int(size/(2*distance))
 
 def get_colour(colour):
     global lower_bound, upper_bound
