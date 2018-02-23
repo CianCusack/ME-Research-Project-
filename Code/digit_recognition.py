@@ -160,6 +160,8 @@ def detect_digits(img):
     ## Do mser detection, get the coodinates and bboxes
     coordinates, bboxes = mser.detectRegions(gray)
     ## Filter the coordinates
+    if len(coordinates) == 0:
+        return None, -1
     coordinates, _ = sort_contours(coordinates, 'top-to-bottom')
     coords = []
     boxes = []
@@ -172,7 +174,7 @@ def detect_digits(img):
             continue
         coords.append(coord)
         boxes.append(bbox)
-        #cv2.rectangle(img, (int(x),int(y)), (int(x+w1), int(y+h1)), (100,255,100), 1)
+        cv2.rectangle(img, (int(x),int(y)), (int(x+w1), int(y+h1)), (100,255,100), 1)
         rect = cv2.minAreaRect(coord)
         theta =  abs(rect[2]/45)
         if theta == 0 or theta == 1:
