@@ -27,8 +27,8 @@ def record_race():
     #cam = cv2.VideoCapture(0)
     #cam = cv2.VideoCapture('../res/sailing.mov')
     #cam = cv2.VideoCapture('../res/olympic_sailing_short.mp4')
-    #cam = cv2.VideoCapture('../res/new_race_4.mov')
-    cam = cv2.VideoCapture('../res/KishRace6BoatCloseShort.mp4')
+    cam = cv2.VideoCapture('../res/new_race_2.mov')
+    #cam = cv2.VideoCapture('../res/KishRace6BoatCloseShort.mp4')
 
     setup(cam)
 
@@ -119,30 +119,25 @@ def record_race():
                 # cv2.waitKey(0)
                 if c[0] < 0 or c[2] < 0 or c[1] < 0 or c[3] < 0:
                     continue
-                img = frame[c[1]:c[3], c[0]:c[2]].copy()
+                img = frame[p1[1]:p2[1], p1[0]:p2[0]].copy()
                 # print img
                 # print c
                 if len(img) == 0:
                     continue
-                extreme_point = get_extreme_point(img)
-                new_point = (extreme_point[0] + c[0], extreme_point[1]+c[1])
-                print new_point
-                cv2.circle(frame, new_point, 5, (0,0,255), thickness=3)
-                points = [(new_point[0]-1, new_point[1]-1),
-                          (new_point[0] - 1, new_point[1]),
-                          (new_point[0], new_point[1] - 1),
-                          new_point,
-                          (new_point[0]+1, new_point[1]+1),
-                          (new_point[0], new_point[1] + 1),
-                          (new_point[0] + 1, new_point[1])]
-                for p in points:
+                extreme_points = get_extreme_point(img)
+                new_points = [(extreme_points[i][0] + c[0], extreme_points[i][1]+c[1]) for i in range(0, len(extreme_points))]
+
+                for p in new_points:
+                    cv2.circle(frame, p, 5, (0,0,255), thickness=3)
                     m1 = slope(p, (buoy_x1, buoy_y2))
+                    # print 'Slope of line: {}'.format(m)
+                    # print 'Slope from boat to buoy {}'.format(m1)
                     if m1 == m:
                         if(img.shape[1] > 50):
                             get_sail_number(img)
                         cv2.putText(frame, "Intersection", (100, 100),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,100), 2)
-                        cv2.circle(frame, new_point,2, (255,0,0), 2)
+                        cv2.circle(frame, p,2, (255,0,0), 2)
                         cv2.imwrite('../res/Screen-Shots/line_crossing.png', frame)
                         print 'Intersection'
                         file.write('Boat {} finished at{} \n'.format(i, time.time() - t0))
