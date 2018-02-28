@@ -2,6 +2,8 @@ import cv2
 import matplotlib.pyplot as plt
 def get_extreme_point(img):
     h, w = img.shape[:2]
+    if h < 10 or w < 10:
+        return None
     gray = cv2.cvtColor(img.copy(), cv2.COLOR_BGR2GRAY)
     _, thresh = cv2.threshold(gray.copy(), 127, 255, cv2.THRESH_BINARY_INV)
     # cv2.imshow('thresh', thresh)
@@ -28,7 +30,7 @@ def get_extreme_point(img):
             temp_x.append(c1[0][0])
             temp_y.append(c1[0][1])
     if len(cnts) == 0:
-        return 0,0
+        return None
 
     points = []
     for x,y in zip(temp_x, temp_y):

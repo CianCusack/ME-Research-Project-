@@ -15,7 +15,7 @@ def track_buoy_by_colour(frame, lower_bound, upper_bound):
         # get bounding rectangle of max contour
         c = max(contours, key=cv2.contourArea)
         x, y, w, h = cv2.boundingRect(c)
-        cv2.rectangle(frame, (x, y), (x + w, y+h), (0,225,255), thickness=2)
+        #cv2.rectangle(frame, (x, y), (x + w, y+h), (0,225,255), thickness=2)
 
     #z = frame[y - h:y + h, x - w:x + w].copy()
     return x, y, x+w, y+h

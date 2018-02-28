@@ -53,7 +53,7 @@ def track_buoy(frame, buoy = []):
 #     else:
 #         return int(1.5*size)
 def calc_range(distance):
-    size = 5000
+    size = 3000
     return int(size/(2*distance))
 
 def get_colour(colour):

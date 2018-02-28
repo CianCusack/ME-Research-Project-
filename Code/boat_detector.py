@@ -42,8 +42,8 @@ def detect_boats(image):
             boats.append(boat)
 
             # display the prediction
-            label = "{} {}: {:.2f}%".format(classes[idx], i+1, confidence * 100.0)
+            #label = "{} {}: {:.2f}%".format(classes[idx], i+1, confidence * 100.0)
             #cv2.rectangle(image, (startX, startY), (endX, endY), (0,0,255), 2)
-            cv2.putText(image, label, (startX, startY-3),
-			    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 2)
+            # cv2.putText(image, label, (startX, startY-3),
+			 #    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 2)
     return boats, boat_positions
