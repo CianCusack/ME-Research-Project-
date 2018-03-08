@@ -27,7 +27,7 @@ def record_race():
     #cam = cv2.VideoCapture('../res/sailing.mov')
     #cam = cv2.VideoCapture('../res/olympic_sailing_short.mp4')
     #cam = cv2.VideoCapture('../res/new_race.mov')
-    cam = cv2.VideoCapture('../res/KishRace6BoatCloseShort.mp4')
+    cam = cv2.VideoCapture('../res/KishRace1.mp4')
 
     setup(cam)
 
@@ -39,7 +39,6 @@ def record_race():
     frame_counter = 1
     last_x1, last_y1, last_x2, last_y2 = 0,0,0,0
     buoy_x1, buoy_y1, buoy_x2, buoy_y2 = 0,0,0,0
-    file = open('../res/finishes.txt', "w")
     time_to_start = 1  # input('How long until the race begins in minutes?')
     #Start time of video reading
 
@@ -50,30 +49,35 @@ def record_race():
         ret, frame = cam.read()
         if not ret:
             break
+        # if frame_counter < 100 and frame_counter > 10:
+        #     frame_counter+=1
+        #     continue
         #Check if race has begun
+        h, w = frame.shape[:2]
         if math.ceil((time.time()-t0)) == time_to_start*60:
             print 'Go!'
 
         """**********Buoy*********"""
-        if frame_counter % 11 == 0 or frame_counter == 1:
+        if (frame_counter % 1 == 0 or frame_counter == 1):
             buoy_x1, buoy_y1, buoy_x2, buoy_y2, buoy = track_buoy(frame.copy(), buoy)
-            if (buoy_x1 == 0.0) and (buoy_y1 == 0.0):
-                lower, upper = get_colour('red')
-                buoy_x1, buoy_y1, buoy_x2, buoy_y2 = track_buoy_by_colour(frame, lower, upper)
-            tracker = cv2.TrackerMedianFlow_create()
-            tracker.init(frame, (buoy_x1, buoy_y1, buoy_x2, buoy_y2))
-        ok, bbox = tracker.update(frame)
-        #if tracking succeeded update boat points
-        if ok:
-            p1 = (int(bbox[0]), int(bbox[1]))
-            p2 = (int(bbox[2]), int(bbox[3]))
-            cv2.rectangle(frame, p1, p2, (255, 0, 0), 2, 1)
-        # Assuming that the center of the camera/video is one end of start/finish line
-        w,h = frame.shape[:2]
-        m = slope((w/2, h), (buoy_x1, buoy_y2))
-        # If buoy position jumps more than halfway across image ignore
-        if (buoy_x1 > last_x1 + w/2 or buoy_y1 > last_y1 + h/2) and (last_x1 != 0):
-            buoy_x1, buoy_y1, buoy_x2, buoy_y2 = last_x1, last_y1, last_x2, last_y2
+            buoy_size = buoy.shape[:2]
+            if (buoy_x1 == 0.0 and buoy_y1 == 0.0) or ((abs(buoy_x1 - last_x1) > buoy_size[0] or abs(buoy_y1 - last_y1) > buoy_size[1]) and frame_counter > 1):
+                # lower, upper = get_colour('red')
+                # buoy_x1, buoy_y1, buoy_x2, buoy_y2 = track_buoy_by_colour(frame, lower, upper)
+                # if ((buoy_x1 - last_x1 > buoy_size[0] or buoy_y1 - last_y1 > buoy_size[1])):
+                buoy_x1, buoy_y1, buoy_x2, buoy_y2 = last_x1, last_y1, last_x2, last_y2
+
+            #     tracker = cv2.TrackerMedianFlow_create()
+            #     tracker.init(frame, (buoy_x1, buoy_y1, buoy_x2, buoy_y2))
+            # ok, bbox = tracker.update(frame)
+            # #if tracking succeeded update boat points
+            # if ok:
+            #     p1 = (int(bbox[0]), int(bbox[1]))
+            #     p2 = (int(bbox[2]), int(bbox[3]))
+            #     cv2.rectangle(frame, p1, p2, (255, 0, 0), 2, 1)
+            # Assuming that the center of the camera/video is one end of start/finish line
+            m = slope((w/2, h), (buoy_x1, buoy_y2))
+            # If buoy position jumps more than halfway across image ignore
         """
             ***** Revisit this solution especially concerning max buoy size
         """
@@ -93,58 +97,68 @@ def record_race():
         """ Only want to detect boats every n frames and on first frame
             We need to create a seperate tracker for each boat
             """
-        # if frame_counter % 23 == 0 or frame_counter == 1:
-        #     boats, coords = detect_boats(frame[0:h, 0:int(buoy_x1+20)])
-        #     trackers = []
-        #     for obj in range(0, len(boats), 1):
-        #         # Initialize tracker with first frame and bounding box
-        #         tracker = cv2.TrackerMedianFlow_create()
-        #         trackers.append(tracker)
-        # # Track boats that were detected on the last detection
-        # else:
-        #     for i, c in enumerate(coords):
-        #         # Initialize tracker with first frame and bounding box
-        #         t = trackers[i]
-        #         t.init(frame, (c[0], c[1], c[2], c[3]))
-        #
-        #         # Update tracker
-        #         ok, bbox = t.update(frame)
-        #         #if tracking succeeded update boat points
-        #         if ok:
-        #             p1 = (int(bbox[0]), int(bbox[1]))
-        #             p2 = (int(bbox[2]), int(bbox[3]))
-        #             #cv2.rectangle(frame, p1, p2, (255, 0, 0), 2, 1)
-        #         else:
-        #             # Tracking failure
-        #             cv2.putText(frame, "Tracking failure detected", (100, 80),
-        #                         cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 2)
-        #         # Ensure that none of the points are invalid
-        #         if p1[0] < 0 or p1[1] < 0 or p2[0] < 0 or p2[1] < 0:
-        #             continue
-        #         img = frame[p1[1]:p2[1], p1[0]:p2[0]].copy()
-        #         # Discard boats that are too small to process meaningfully
-        #         if len(img) < 50:
-        #             continue
-        #         # Get the extreme points of the boat for line crossing
-        #         extreme_points = get_extreme_point(img)
-        #         if extreme_points == None:
-        #             continue
-        #         new_points = [(extreme_points[i][0] + p1[0], extreme_points[i][1]+p1[1]) for i in range(0, len(extreme_points))]
-        #
-        #         # Check that the boat has crossed the line by checking slope of new_points
-        #         for p in new_points:
-        #             cv2.circle(frame, p, 5, (0,0,255), thickness=3)
-        #             m1 = slope(p, (buoy_x1, buoy_y2))
-        #             if m1 == m:
-        #                 if(img.shape[1] > 50):
-        #                     get_sail_number(img)
-        #                 cv2.putText(frame, "Intersection", (100, 100),
-        #                     cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,100), 2)
-        #                 cv2.circle(frame, p,2, (255,0,0), 2)
-        #                 cv2.imwrite('../res/Screen-Shots/line_crossing.png', frame)
-        #                 print 'Intersection'
-        #                 file.write('Boat {} finished at{} \n'.format(i, time.time() - t0))
+        if frame_counter % 23 == 0 or frame_counter == 1:
+            boats, coords = detect_boats(frame[0:h, 0:int(buoy_x1+20)])
+            trackers = []
+            for obj in range(0, len(boats), 1):
+                # Initialize tracker with first frame and bounding box
+                tracker = cv2.TrackerMedianFlow_create()
+                trackers.append(tracker)
 
+        # Track boats that were detected on the last detection
+        else:
+            for i, c in enumerate(coords):
+                # Initialize tracker with first frame and bounding box
+                if c[2] > buoy_x1:
+                    continue
+                t = trackers[i]
+                t.init(frame, (c[0], c[1], c[2], c[3]))
+
+                # Update tracker
+                ok, bbox = t.update(frame)
+                #if tracking succeeded update boat points
+                if ok:
+                    p1 = (int(bbox[0]), int(bbox[1]))
+                    p2 = (int(bbox[2]), int(bbox[3]))
+                    #cv2.rectangle(frame, p1, p2, (255, 0, 0), 2, 1)
+                else:
+                    # Tracking failure
+                    cv2.putText(frame, "Tracking failure detected", (100, 80),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 255), 2)
+                # Ensure that none of the points are invalid
+                if p1[0] < 0 or p1[1] < 0 or p2[0] < 0 or p2[1] < 0:
+                    continue
+                img = frame[p1[1]:p2[1], p1[0]:p2[0]].copy()
+
+
+                # Discard boats that are too small to process meaningfully
+                if len(img) < 50:
+                    continue
+                # Get the extreme points of the boat for line crossing
+                extreme_points = get_extreme_point(img)
+                if extreme_points == None:
+                    continue
+                new_points = [(extreme_points[i][0] + p1[0], extreme_points[i][1]+p1[1]) for i in range(0, len(extreme_points))]
+                for p in new_points:
+                    if p[0] > buoy_x1:
+                        new_points.remove(p)
+                # Check that the boat has crossed the line by checking slope of new_points
+                for p in new_points:
+                    cv2.circle(frame, p, 5, (0,0,255), thickness=3)
+                    m1 = slope(p, (buoy_x1, buoy_y2))
+                    if m1 == m:
+                        if(img.shape[1] > 50):
+                            sail_number = get_sail_number(img)
+                        cv2.putText(frame, "Intersection", (100, 100),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,100), 2)
+                        proof_img = frame.copy()
+                        cv2.circle(proof_img, p,2, (255,0,0), 2)
+                        cv2.line(proof_img, (w / 2, h), (int(buoy_x1), int(buoy_y2)), (0, 0, 255), 1)
+                        file = open('../res/finishes.txt', "a")
+                        cv2.imwrite('../res/Screen-Shots/line_crossing.png', proof_img)
+                        print 'Intersection'
+                        file.write('Boat  with sail number {} finished at {} \n'.format(sail_number, time.time() - t0))
+                        file.close()
         # for i, c in enumerate(coords):
         #     test = frame[c[1]:c[3], c[0]:c[2]]
         #     cv2.imwrite('../res/test/test{}.png'.format(i+1), test)
@@ -192,14 +206,14 @@ def record_race():
 
         cv2.putText(frame, "Total Frames : " + str(frame_counter), (100, 50),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50, 170, 50), 2);
-        cv2.imshow('image', frame)
+        cv2.imshow('frame', frame)
         #out.write(frame)
         cv2.waitKey(1)
         frame_counter += 1
+    print 'Total frames: {}'.format(frame_counter)
     print 'Average frame rate: {} FPS'.format(frame_counter/(time.time() - t0))
     cam.release()
     #out.release()
-    file.close()
 
 def locate_numbers(boat):
 

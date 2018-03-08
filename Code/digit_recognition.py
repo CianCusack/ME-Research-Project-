@@ -137,8 +137,8 @@ def get_sail_number_line(boxes, img):
     masked_image = cv2.bitwise_and(img_mask, mask)
     cv2.imwrite('../res/Sail Numbers/bottom.png', masked_image)
     sail_imgs.append(masked_image)
-    cv2.rectangle(img, (top_line[0][0], top_line[0][1]), (top_line[3][0], top_line[3][1]), (0, 0, 255), 2)
-    cv2.rectangle(img, (bottom_line[2][0], bottom_line[2][1]), (bottom_line[1][0], bottom_line[1][1]), (0, 255, 255), 2)
+    #cv2.rectangle(img, (top_line[0][0], top_line[0][1]), (top_line[3][0], top_line[3][1]), (0, 0, 255), 2)
+    #cv2.rectangle(img, (bottom_line[2][0], bottom_line[2][1]), (bottom_line[1][0], bottom_line[1][1]), (0, 255, 255), 2)
     # cv2.imshow('vis', img)
     # cv2.waitKey(0)
     return sail_imgs
@@ -174,7 +174,7 @@ def detect_digits(img):
             continue
         coords.append(coord)
         boxes.append(bbox)
-        cv2.rectangle(img, (int(x),int(y)), (int(x+w1), int(y+h1)), (100,255,100), 1)
+       #cv2.rectangle(img, (int(x),int(y)), (int(x+w1), int(y+h1)), (100,255,100), 1)
         rect = cv2.minAreaRect(coord)
         theta =  abs(rect[2]/45)
         if theta == 0 or theta == 1:
@@ -220,7 +220,7 @@ def detect_digits(img):
             top_ys.append(b[1])
             #cv2.rectangle(img, (b[0], b[1]), (b[0]+b[2], b[1]+b[3]), (255, 0, 0), 2)
         sail_imgs = [img[min(top_ys): max(top_ys)+max(hs), min(top_xs):max(top_xs)+max(ws)].copy()]
-        cv2.rectangle(img, (min(top_xs), min(top_ys)), (max(top_xs)+ max(ws), max(top_ys)+max(hs)), (255,0,0), 2)
+        #cv2.rectangle(img, (min(top_xs), min(top_ys)), (max(top_xs)+ max(ws), max(top_ys)+max(hs)), (255,0,0), 2)
         # top_line = [0, 0, 0, 0]
         # bottom_line = [0, 0, 0, 0]
         # for b in boxes:
@@ -285,13 +285,15 @@ def get_sail_number(img):
 
     #results.append(difflib.get_close_matches((''.join(sail_num)), nums))
     results.append(difflib.get_close_matches(digits[0], nums))
+    if len(results) == 0:
+        return 0
     #results.append(difflib.get_close_matches(digits[1], nums))
     #print results
     # for result in results:
     #     for r in result:
     #         if len(r) == avg:
     #             print 'The sailing number is {}'.format(r)
-
+    return results[0]
 # img1 = cv2.imread('../res/sail_numbers_cropped_2.jpg')
 # #img1 = cv2.imread('../res/boat.png')
 # get_sail_number(img1)

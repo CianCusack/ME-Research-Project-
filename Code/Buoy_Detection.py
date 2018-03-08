@@ -40,18 +40,7 @@ def track_buoy(frame, buoy = []):
     else:
         return 0,0,0,0, buoy
 
-"""
-    This formula needs to updated to be more accurate
-"""
-# def calc_range(distance):
-#     size = 20
-#     if distance > (2.5*size):
-#         if distance > (size * 5):
-#             return int(size - 1.5 * (distance / size))
-#         return int(size-4*(distance/size))
-#
-#     else:
-#         return int(1.5*size)
+
 def calc_range(distance):
     size = 3000
     return int(size/(2*distance))
@@ -73,3 +62,11 @@ def get_colour(colour):
     if colour.lower() == 'black':
         lower_bound = np.array([0, 0, 0])
         upper_bound = np.array([75, 75, 75])
+
+def buoy_within_boat(boat_coords, buoy_coords):
+    x_boat, y_boat, x1_boat, y1_boat = boat_coords
+    x_buoy, y_buoy, x1_buoy, y1_buoy = buoy_coords
+
+    if (x_buoy > x_boat and x_buoy < x1_boat) and (y_buoy > y_boat and y_buoy < y1_boat):
+        return True
+    return False
