@@ -26,8 +26,8 @@ def record_race():
     #cam = cv2.VideoCapture(0)
     #cam = cv2.VideoCapture('../res/sailing.mov')
     #cam = cv2.VideoCapture('../res/olympic_sailing_short.mp4')
-    #cam = cv2.VideoCapture('../res/new_race.mov')
-    cam = cv2.VideoCapture('../res/KishRace1.mp4')
+    cam = cv2.VideoCapture('../res/new_race_2.mov')
+    #cam = cv2.VideoCapture('../res/KishRace6.mp4')
 
     setup(cam)
 
@@ -39,7 +39,8 @@ def record_race():
     frame_counter = 1
     last_x1, last_y1, last_x2, last_y2 = 0,0,0,0
     buoy_x1, buoy_y1, buoy_x2, buoy_y2 = 0,0,0,0
-    time_to_start = 1  # input('How long until the race begins in minutes?')
+    time_to_start = 1
+    #time_to_start = input('How long until the race begins in minutes?')
     #Start time of video reading
 
 
@@ -54,11 +55,10 @@ def record_race():
         #     continue
         #Check if race has begun
         h, w = frame.shape[:2]
-        if math.ceil((time.time()-t0)) == time_to_start*60:
-            print 'Go!'
+
 
         """**********Buoy*********"""
-        if (frame_counter % 1 == 0 or frame_counter == 1):
+        if (frame_counter % 10 == 0 or frame_counter == 1):
             buoy_x1, buoy_y1, buoy_x2, buoy_y2, buoy = track_buoy(frame.copy(), buoy)
             buoy_size = buoy.shape[:2]
             if (buoy_x1 == 0.0 and buoy_y1 == 0.0) or ((abs(buoy_x1 - last_x1) > buoy_size[0] or abs(buoy_y1 - last_y1) > buoy_size[1]) and frame_counter > 1):
@@ -66,17 +66,23 @@ def record_race():
                 # buoy_x1, buoy_y1, buoy_x2, buoy_y2 = track_buoy_by_colour(frame, lower, upper)
                 # if ((buoy_x1 - last_x1 > buoy_size[0] or buoy_y1 - last_y1 > buoy_size[1])):
                 buoy_x1, buoy_y1, buoy_x2, buoy_y2 = last_x1, last_y1, last_x2, last_y2
+            if frame_counter > 1:
+                tracker = cv2.TrackerKCF_create()
 
-            #     tracker = cv2.TrackerMedianFlow_create()
-            #     tracker.init(frame, (buoy_x1, buoy_y1, buoy_x2, buoy_y2))
-            # ok, bbox = tracker.update(frame)
-            # #if tracking succeeded update boat points
-            # if ok:
-            #     p1 = (int(bbox[0]), int(bbox[1]))
-            #     p2 = (int(bbox[2]), int(bbox[3]))
-            #     cv2.rectangle(frame, p1, p2, (255, 0, 0), 2, 1)
-            # Assuming that the center of the camera/video is one end of start/finish line
-            m = slope((w/2, h), (buoy_x1, buoy_y2))
+                tracker.init(frame, (buoy_x1, buoy_y1, buoy_x2, buoy_y2))
+        if frame_counter > 10 and frame_counter % 3 == 0:
+
+            ok, bbox = tracker.update(frame)
+            #if tracking succeeded update boat points
+            if ok:
+                p1 = (int(bbox[0]), int(bbox[1]))
+                p2 = (int(bbox[2]), int(bbox[3]))
+                cv2.rectangle(frame, p1, p2, (255, 0, 0), 2, 1)
+                if(abs(p1[0] - last_x1) < buoy_size[0] or abs(p1[1] - last_y1) < buoy_size[1]):
+                    buoy_x1, buoy_y1 = p1
+                    buoy_x2, buoy_y2 = p2
+        # Assuming that the center of the camera/video is one end of start/finish line
+        m = slope((w/2, h), (buoy_x1, buoy_y2))
             # If buoy position jumps more than halfway across image ignore
         """
             ***** Revisit this solution especially concerning max buoy size
@@ -106,7 +112,7 @@ def record_race():
                 trackers.append(tracker)
 
         # Track boats that were detected on the last detection
-        else:
+        elif frame_counter % 3 == 0:
             for i, c in enumerate(coords):
                 # Initialize tracker with first frame and bounding box
                 if c[2] > buoy_x1:
@@ -147,6 +153,9 @@ def record_race():
                     cv2.circle(frame, p, 5, (0,0,255), thickness=3)
                     m1 = slope(p, (buoy_x1, buoy_y2))
                     if m1 == m:
+                        if not has_race_started(t0, time_to_start):
+                            print 'Boat false started'
+                            continue
                         if(img.shape[1] > 50):
                             sail_number = get_sail_number(img)
                         cv2.putText(frame, "Intersection", (100, 100),
@@ -268,7 +277,10 @@ def locate_numbers(boat):
         i -= 1
     return boat
 
-
+def has_race_started(t0, time_to_start):
+    if math.ceil((time.time() - t0)) == time_to_start * 60:
+        return True
+    return False
 def get_colour(colour):
     if colour == 'red':
         lower_bound = np.array([0, 0, 50])
