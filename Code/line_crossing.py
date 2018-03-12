@@ -1,5 +1,3 @@
-import cv2
-import numpy as np
 import math
 
 def slope(p1, p2):

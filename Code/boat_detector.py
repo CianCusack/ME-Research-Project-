@@ -1,8 +1,11 @@
 import numpy as np
 import cv2
 
+net = cv2.dnn.readNetFromCaffe("../deep learning/MobileNetSSD_deploy.prototxt.txt",
+                                   "../deep learning/MobileNetSSD_deploy.caffemodel")
 
 def detect_boats(image):
+    global net
     confidence_thresh = 0.1
     # Really only care about boats but can detect others
     classes = ["background", "aeroplane", "bicycle", "bird", "boat",
@@ -11,8 +14,8 @@ def detect_boats(image):
 		"sofa", "train", "tv monitor"]
 
     # load our serialised model from disk
-    net = cv2.dnn.readNetFromCaffe("../deep learning/MobileNetSSD_deploy.prototxt.txt",
-                                   "../deep learning/MobileNetSSD_deploy.caffemodel")
+    # net = cv2.dnn.readNetFromCaffe("../deep learning/MobileNetSSD_deploy.prototxt.txt",
+    #                                "../deep learning/MobileNetSSD_deploy.caffemodel")
 
     # current frame is used to construct an input blob by resizing to a
     # fixed 300x300 pixels and then normalizing it
@@ -34,16 +37,10 @@ def detect_boats(image):
         # i.e. confidence should always be between threshold and 1, ignore all else
         if confidence > confidence_thresh and confidence <= 1:
             # Compute the position of the boat and add it to the boat_positions array
-            idx = int(detections[0, 0, i, 1])
             box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
             startX, startY, endX, endY = box.astype("int")
             boat_positions.append([startX, startY, endX, endY])
             boat = image[startY:endY, startX: endX].copy()
             boats.append(boat)
 
-            # display the prediction
-            #label = "{} {}: {:.2f}%".format(classes[idx], i+1, confidence * 100.0)
-            #cv2.rectangle(image, (startX, startY), (endX, endY), (0,0,255), 2)
-            # cv2.putText(image, label, (startX, startY-3),
-			 #    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 2)
     return boats, boat_positions

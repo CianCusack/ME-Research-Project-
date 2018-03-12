@@ -1,7 +1,6 @@
 
 import cv2
 import numpy as np
-from matplotlib import pyplot as plt
 
 
 def sort_contours(cnts, method="left-to-right"):
@@ -98,14 +97,14 @@ def recognise_digits(img):
                 else:
                         strings = np.append(strings, '')
         inc = 0
-        for index, image in enumerate(images):
-                if(strings[index] == ''):
-                        inc += 1
-                        continue
-                plt.subplot(2, len(strings[strings!=''])/2 +1 , index + 1 - inc)
-                plt.axis('off')
-                plt.imshow(image, cmap=plt.cm.gray_r, interpolation='nearest')
-                plt.title('Predicted {}'.format(strings[index]))
+        # for index, image in enumerate(images):
+        #         if(strings[index] == ''):
+        #                 inc += 1
+        #                 continue
+        #         plt.subplot(2, len(strings[strings!=''])/2 +1 , index + 1 - inc)
+        #         plt.axis('off')
+        #         plt.imshow(image, cmap=plt.cm.gray_r, interpolation='nearest')
+        #         plt.title('Predicted {}'.format(strings[index]))
         #plt.show()
         return ''.join(strings)
 
