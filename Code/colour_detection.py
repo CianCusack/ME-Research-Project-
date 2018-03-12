@@ -8,6 +8,8 @@ def track_buoy_by_colour(frame, lower_bound, upper_bound):
     mask = cv2.inRange(frame, lower_bound, upper_bound)
     mask = cv2.erode(mask, None, iterations=2)
     mask = cv2.dilate(mask, None, iterations=2)
+    # cv2.imshow('mask', mask)
+    # cv2.waitKey(0)
 
     _, contours, _ = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
                             cv2.CHAIN_APPROX_SIMPLE)

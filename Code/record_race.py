@@ -19,15 +19,15 @@ def setup(cam):
     ver, first = cam.read()
     cv2.imshow('image', first)
     cv2.waitKey(3000)
-    cv2.destroyWindow('image')
+    #cv2.destroyWindow('image')
 
 def record_race():
     #Choose camera
     #cam = cv2.VideoCapture(0)
     #cam = cv2.VideoCapture('../res/sailing.mov')
     #cam = cv2.VideoCapture('../res/olympic_sailing_short.mp4')
-    cam = cv2.VideoCapture('../res/new_race_2.mov')
-    #cam = cv2.VideoCapture('../res/KishRace6.mp4')
+    cam = cv2.VideoCapture('../res/new_race_4.mov')
+    #cam = cv2.VideoCapture('../res/KishRace6BoatCloseShort.mp4')
 
     setup(cam)
 
@@ -59,12 +59,9 @@ def record_race():
 
         """**********Buoy*********"""
         if (frame_counter % 10 == 0 or frame_counter == 1):
-            buoy_x1, buoy_y1, buoy_x2, buoy_y2, buoy = track_buoy(frame.copy(), buoy)
+            buoy_x1, buoy_y1, buoy_x2, buoy_y2, buoy, user_change = track_buoy(frame.copy(), buoy)
             buoy_size = buoy.shape[:2]
-            if (buoy_x1 == 0.0 and buoy_y1 == 0.0) or ((abs(buoy_x1 - last_x1) > buoy_size[0] or abs(buoy_y1 - last_y1) > buoy_size[1]) and frame_counter > 1):
-                # lower, upper = get_colour('red')
-                # buoy_x1, buoy_y1, buoy_x2, buoy_y2 = track_buoy_by_colour(frame, lower, upper)
-                # if ((buoy_x1 - last_x1 > buoy_size[0] or buoy_y1 - last_y1 > buoy_size[1])):
+            if ((buoy_x1 == 0.0 and buoy_y1 == 0.0) or ((abs(buoy_x1 - last_x1) > buoy_size[0] or abs(buoy_y1 - last_y1) > buoy_size[1]) and frame_counter > 1) or (abs(buoy_x2 - last_x2) > buoy_size[0] or abs(buoy_y2 - last_y2) > buoy_size[1])) and not user_change:
                 buoy_x1, buoy_y1, buoy_x2, buoy_y2 = last_x1, last_y1, last_x2, last_y2
             if frame_counter > 1:
                 tracker = cv2.TrackerKCF_create()
@@ -78,7 +75,7 @@ def record_race():
                 p1 = (int(bbox[0]), int(bbox[1]))
                 p2 = (int(bbox[2]), int(bbox[3]))
                 cv2.rectangle(frame, p1, p2, (255, 0, 0), 2, 1)
-                if(abs(p1[0] - last_x1) < buoy_size[0] or abs(p1[1] - last_y1) < buoy_size[1]):
+                if(abs(p1[0] - last_x1) < buoy_size[0] and abs(p2[0] - last_y2) < buoy_size[0]):
                     buoy_x1, buoy_y1 = p1
                     buoy_x2, buoy_y2 = p2
         # Assuming that the center of the camera/video is one end of start/finish line
@@ -215,7 +212,7 @@ def record_race():
 
         cv2.putText(frame, "Total Frames : " + str(frame_counter), (100, 50),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50, 170, 50), 2);
-        cv2.imshow('frame', frame)
+        cv2.imshow('image', frame)
         #out.write(frame)
         cv2.waitKey(1)
         frame_counter += 1
@@ -281,15 +278,3 @@ def has_race_started(t0, time_to_start):
     if math.ceil((time.time() - t0)) == time_to_start * 60:
         return True
     return False
-def get_colour(colour):
-    if colour == 'red':
-        lower_bound = np.array([0, 0, 50])
-        upper_bound = np.array([50, 50, 255])
-    elif colour == 'white':
-        lower_bound = np.array([0, 0, 50])
-        upper_bound = np.array([50, 50, 255])
-    else:
-        lower_bound = np.array([0, 0, 0])
-        upper_bound = np.array([255, 255, 255])
-
-    return lower_bound, upper_bound
