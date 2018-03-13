@@ -28,10 +28,10 @@ def track_buoy(frame, buoy = []):
     if xCoord != 100 and yCoord != 100:
         #Find the buoy - only performed once at start up
         if count ==0:
-            # distance = input('Approximately how far away is the buoy?')
-            # colour = raw_input('What is the main colour of the buoy?')
-            distance = 150
-            colour = ''
+            distance = input('Approximately how far away is the buoy?')
+            colour = raw_input('What is the main colour of the buoy?')
+            # distance = 150
+            # colour = ''
             #get approx size of buoy
             size = calc_range(distance)
             #Get buoy image
@@ -46,6 +46,8 @@ def track_buoy(frame, buoy = []):
         x1, y1, x2, y2 = match_template(frame, buoy)
         if distance < 100:
             (lower, upper) = get_colour_for_tracking(colour)
+            if sum(lower) == 0 and sum(upper) == 0:
+                return float(x1), float(y1), float(x2), float(y2), buoy, manual_change
             x1_c, y1_c, x2_c, y2_c = track_buoy_by_colour(frame, lower, upper)
             center_1 = (int((x2-x1)/2), int((y2-y1)/2))
             center_2 = (int((x2_c - x1_c) / 2), int((y2_c - y1_c) / 2))
@@ -72,5 +74,6 @@ def buoy_within_boat(boat_coords, buoy_coords):
 def get_colour_for_tracking(colour):
     return {
         'red': (np.array([0, 0, 50]),  np.array([50, 50, 255])),
-        'white' : (np.array([100, 100, 200]), np.array([255, 255, 255]))
+        'white' : (np.array([100, 100, 200]), np.array([255, 255, 255])),
+        '' : (np.array([0, 0, 0]), np.array([0, 0, 0]))
     }[colour]

@@ -29,17 +29,17 @@ def record_race():
     #cam = cv2.VideoCapture('../res/new_race_1.mov')
     cam = cv2.VideoCapture('../res/KishRace6BoatCloseShort.mp4')
 
-    #setup(cam)
+    setup(cam)
 
     #out = cv2.VideoWriter('../res/sample_output.avi', -1, 23.0, (1280,720))
     #Buoy is initially unknown
     buoy = []
-    counter = 0
+    boat_crossing_counter = 0
+    false_start_counter = 0
     #First frame has already been read in setup
     frame_counter = 1
     last_x1, last_y1, last_x2, last_y2 = 0,0,0,0
     buoy_x1, buoy_y1, buoy_x2, buoy_y2 = 0,0,0,0
-    last_buoy_average_colour = (0,0,0)
     time_to_start = 0
     #time_to_start = input('How long until the race begins in minutes?')
     #Start time of video reading
@@ -62,7 +62,7 @@ def record_race():
         if (frame_counter % 5 == 0 or frame_counter == 1):
             buoy_x1, buoy_y1, buoy_x2, buoy_y2, buoy, user_change = track_buoy(frame.copy(), buoy)
             buoy_size = buoy.shape[:2]
-            if ((buoy_x1 == 0.0 and buoy_y1 == 0.0) or ((abs(buoy_x1 - last_x1) > buoy_size[0] or abs(buoy_y1 - last_y1) > buoy_size[1]) and frame_counter > 1) or (abs(buoy_x2 - last_x2) > buoy_size[0] or abs(buoy_y2 - last_y2) > buoy_size[1])) and not user_change:
+            if ((buoy_x1 == 0.0 and buoy_y1 == 0.0) or ((abs(buoy_x1 - last_x1) > 2*buoy_size[0] or abs(buoy_y1 - last_y1) > 2*buoy_size[1]) and frame_counter > 1)) and not user_change:
                 buoy_x1, buoy_y1, buoy_x2, buoy_y2 = last_x1, last_y1, last_x2, last_y2
 
         # Assuming that the center of the camera/video is one end of start/finish line
@@ -125,35 +125,40 @@ def record_race():
                     continue
                 new_points = [(extreme_points[i][0] + p1[0], extreme_points[i][1]+p1[1]) for i in range(0, len(extreme_points))]
                 for p in new_points:
-                    if p[0] > buoy_x1 or p[0] < w/2:
-                        new_points.remove(p)
-                # Check that the boat has crossed the line by checking slope of new_points
-                for p in new_points:
-                    for l in line_crossing:
-                        if abs(l[0] - p[0]) < 10 or abs(l[1] - p[1]) < 10:
-                            p = None
+                    if p[0] > buoy_x1 or p[0] < w / 2:
+                        continue
+                    if len(line_crossing) != 0:
+                        for l in line_crossing:
+                            if abs(l[0] - p[0]) < 50 or abs(l[1] - p[1]) < 50:
+                                p = None
+                                break
                     if p == None:
                         continue
                     cv2.circle(frame, p, 5, (0,0,255), thickness=3)
                     m1 = slope(p, (buoy_x1, buoy_y2))
                     if m1 == m:
                         line_crossing.add(p)
+                        proof_img = frame.copy()
+                        cv2.circle(proof_img, p, 2, (255, 0, 0), 2)
+                        cv2.rectangle(proof_img, (int(buoy_x1), int(buoy_y1)), (int(buoy_x2), int(buoy_y2)),
+                                      (0, 255, 0), 1)
+                        cv2.line(proof_img, (w / 2, h), (int(buoy_x1), int(buoy_y2)), (0, 0, 255), 1)
                         if not has_race_started(t0, time_to_start):
                             print 'Boat false started'
+                            false_start_counter += 1
+                            cv2.imwrite('../res/Screen-Shots/False Starts/{}.png'.format(false_start_counter), proof_img)
                             continue
                         if(img.shape[1] > 50):
                             sail_number = get_sail_number(img)
                         cv2.putText(frame, "Intersection", (100, 100),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,100), 2)
-                        proof_img = frame.copy()
-                        cv2.circle(proof_img, p,2, (255,0,0), 2)
-                        cv2.rectangle(proof_img, (int(buoy_x1), int(buoy_y1)), (int(buoy_x2), int(buoy_y2)), (0, 255, 0), 1)
-                        cv2.line(proof_img, (w / 2, h), (int(buoy_x1), int(buoy_y2)), (0, 0, 255), 1)
                         file = open('../res/finishes.txt', "a")
-                        cv2.imwrite('../res/Screen-Shots/line_crossing.png', proof_img)
-                        print 'Intersection at: {}'.format(p)
                         file.write('Boat  with sail number {} finished at {} \n'.format(sail_number, time.time() - t0))
                         file.close()
+                        boat_crossing_counter += 1
+                        cv2.imwrite('../res/Screen-Shots/Finishes/{}.png'.format(boat_crossing_counter), proof_img)
+                        print 'Intersection at: {}'.format(p)
+
                         break
 
         """ This section is purely for display to show the time, total frames and type of tracker"""
