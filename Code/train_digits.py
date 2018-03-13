@@ -48,4 +48,4 @@ print len(samples)
 print responses
 np.savetxt('generalsamples_1.data',samples)
 np.savetxt('generalresponses_slanted_1.data',responses)
-#
+

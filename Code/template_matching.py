@@ -1,5 +1,4 @@
 import cv2
-from feature_recognition_practice import *
 
 
 def match_template(img, template):

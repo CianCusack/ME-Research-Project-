@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 
-
 def four_point_transform(imgs, mode):
     images = []
     for count, img in enumerate(imgs):
@@ -16,7 +15,6 @@ def four_point_transform(imgs, mode):
         temp_x = []
         temp_y = []
         for c in cnts:
-            #cv2.drawContours(img, c, -1, (0,255,0), 2)
 
             for c1 in c:
                 temp_x.append(c1[0][0])
@@ -62,29 +60,12 @@ def four_point_transform(imgs, mode):
 
         bottom_right = [max_x, max_y]
 
-        #cv2.rectangle(img, (top_left[0], top_left[1]), (bottom_right[0], bottom_right[1]), (255,0,0), 2)
-        # cv2.circle(img, (top_left[0], top_left[1]), 2, (255,0,0), 2)
-        # cv2.circle(img, (top_right[0], top_right[1]), 2, (255, 0, 0), 2)
-        # cv2.circle(img, (bottom_right[0], bottom_right[1]), 2, (255, 0, 0), 2)
-        # cv2.circle(img, (bottom_left[0], bottom_left[1]), 2, (255,0,0), 2)
 
-        # cv2.imshow('img', img)
-        # cv2.waitKey(0)
         transform_points = np.float32([top_left, bottom_left, top_right, bottom_right])
         transform_to_points = np.float32([[0, 0], [0,400], [400, 0], [400,400]])
 
         M = cv2.getPerspectiveTransform(transform_points,transform_to_points)
         dst = cv2.warpPerspective(img,M,(400,400))
-
-        row, col= dst.shape[:2]
-        bottom= dst[row-2:row, 0:col]
-
-        # bordersize=15
-        # dst=cv2.copyMakeBorder(dst, top=bordersize, bottom=bordersize, left=bordersize, right=bordersize, borderType= cv2.BORDER_CONSTANT, value=[220,220,220] )
-
-        # plt.subplot(121),plt.imshow(img),plt.title('Input')
-        # plt.subplot(122),plt.imshow(dst),plt.title('Output')
-        # plt.show()
 
         dst = cv2.resize(dst, (w,h))
         cv2.imwrite('../res/Sail Numbers/individual/rotated/{}.png'.format(count), dst)

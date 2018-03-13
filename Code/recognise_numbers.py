@@ -1,7 +1,5 @@
-
 import cv2
 import numpy as np
-
 
 def sort_contours(cnts, method="left-to-right"):
         # initialize the reverse flag and sort index
@@ -17,8 +15,7 @@ def sort_contours(cnts, method="left-to-right"):
         if method == "top-to-bottom" or method == "bottom-to-top":
                 i = 1
 
-        # construct the list of bounding boxes and sort them from top to
-        # bottom
+        # construct the list of bounding boxes and sort them from top to bottom
         boundingBoxes = [cv2.boundingRect(c) for c in cnts]
         (cnts, boundingBoxes) = zip(*sorted(zip(cnts, boundingBoxes),
                                             key=lambda b: b[1][0], reverse=reverse))
@@ -64,8 +61,7 @@ def recognise_digits(img):
                         temp_y.append(c1[0][1])
 
                 images.append(img[min(temp_y):max(temp_y), min(temp_x): max(temp_x)].copy())
-                # cv2.imshow('img', img[min(temp_y):max(temp_y), min(temp_x): max(temp_x)].copy())
-                # cv2.waitKey(0)
+
         for img in images:
                 gray = cv2.cvtColor(img.copy(), cv2.COLOR_BGR2GRAY)
                 thresh = cv2.adaptiveThreshold(gray, 255, 1, 1, 11, 2)
@@ -78,9 +74,6 @@ def recognise_digits(img):
                                 [x, y, w, h] = cv2.boundingRect(cnt)
 
                                 if h > 28:
-                                        # cv2.drawContours(img, cnt, -1, (255,0,0), 2)
-                                        # cv2.imshow('img', img)
-                                        # cv2.waitKey(0)
                                         roi = thresh[y:y + h, x:x + w]
                                         roismall = cv2.resize(roi, (10, 10))
                                         roismall = roismall.reshape((1, 100))
@@ -96,17 +89,6 @@ def recognise_digits(img):
                         strings = np.append(strings, str(np.bincount(results).argmax()))
                 else:
                         strings = np.append(strings, '')
-        inc = 0
-        # for index, image in enumerate(images):
-        #         if(strings[index] == ''):
-        #                 inc += 1
-        #                 continue
-        #         plt.subplot(2, len(strings[strings!=''])/2 +1 , index + 1 - inc)
-        #         plt.axis('off')
-        #         plt.imshow(image, cmap=plt.cm.gray_r, interpolation='nearest')
-        #         plt.title('Predicted {}'.format(strings[index]))
-        #plt.show()
+
         return ''.join(strings)
 
-# img = cv2.imread('../res/Sail Numbers/individual/0.png')
-# recognise_digits(img)
