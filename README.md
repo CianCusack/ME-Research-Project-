@@ -11,4 +11,5 @@ Records finish times of  boats
 
 Still working on sail number recognition
 
-<image src ="res/Screen-Shots/line_crossing.png"/>
+<image src ="res/Screen-Shots/Finishes/1.png"/>
+<image src ="res/Screen-Shots/Finishes/2.png"/>
