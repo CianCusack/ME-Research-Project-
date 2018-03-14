@@ -17,6 +17,7 @@ def setup(cam):
     display = cv2.namedWindow('image')
     cv2.setMouseCallback('image', buoy_points)
     ver, first = cam.read()
+    first = cv2.flip(first, 1)
     cv2.imshow('image', first)
     cv2.waitKey(3000)
     #cv2.destroyWindow('image')
@@ -30,7 +31,9 @@ def record_race():
     cam = cv2.VideoCapture('../res/KishRace6BoatCloseShort.mp4')
     #cam = cv2.VideoCapture('../res/KishRace5.mp4')
 
-    #setup(cam)
+    setup(cam)
+
+    mode = get_direction_of_travel()
 
     #out = cv2.VideoWriter('../res/sample_output.avi', -1, 23.0, (1280,720))
 
@@ -63,6 +66,8 @@ def record_race():
         if not ret:
             break
 
+        #For testing direction of travel
+        frame = cv2.flip(frame, 1)
         # Get the height and width of the frame
         h, w = frame.shape[:2]
 
@@ -97,7 +102,11 @@ def record_race():
         if frame_counter % 5 == 0 or frame_counter == 1:
             if buoy_x1 == 0:
                 continue
-            boats, coords = detect_boats(frame[0:h, 0:int(buoy_x1)+100])
+            if mode == 1:
+                boats, coords = detect_boats(frame[0:h, 0:int(buoy_x1)+100])
+            else:
+                boats, coords = detect_boats(frame[0 : h,  0 : w])
+                # int(buoy_x1) + 100
             trackers = []
             for obj in range(0, len(boats), 1):
                 # Initialize tracker with first frame and bounding box
@@ -106,10 +115,13 @@ def record_race():
 
         # Track boats that were detected on the last detection
         for i, c in enumerate(coords):
-
                 # Only concerned with boats that are close to the line
-                if c[2] > buoy_x1 or c[2] < w/2:
+                if mode == 1 and (c[2] > buoy_x1 or c[2] < w/2):
                     continue
+                elif mode == 2 and (c[0] < buoy_x1 or c[0] > w/2):
+                    continue
+
+                #cv2.rectangle(frame, (c[0], c[1]), (c[2], c[3]), (255,0,0), 2)
 
                 # Initialize tracker with first frame and bounding box
                 t = trackers[i]
@@ -143,7 +155,7 @@ def record_race():
                     TO DO: INCLUDE DIRECTION OF TRAVEL IN EXTREME POINTS
                 """
                 # Get the extreme points of the boat for line crossing
-                extreme_points = get_extreme_point(boat_img)
+                extreme_points = get_extreme_point(boat_img, mode)
 
                 # If no points are found continue
                 if extreme_points == None:
@@ -155,7 +167,9 @@ def record_race():
                 for p in new_points:
 
                     # Ignore points that are not close to the line
-                    if p[0] > buoy_x1 or p[0] < w / 2:
+                    if mode == 1 and (p[0] > buoy_x1 or p[0] < w / 2):
+                        continue
+                    elif mode == 2 and (p[0] < buoy_x1 or p[0] > w / 2):
                         continue
                     # Ignore points near points that have been detected as crossing the line since last boat detection
                     if len(line_crossing) != 0:
@@ -168,10 +182,12 @@ def record_race():
                         continue
 
                     # Show the point on the screen
-                    # cv2.circle(frame, p, 1, (0,0,255), thickness=1)
+                    cv2.circle(frame, p, 1, (0,0,255), thickness=1)
 
                     """
                         TO DO: INCLUDE DIRECTION OF TRAVEL IN SLOPE CALCULATION
+                        
+                        Does direction of travel matter to slope???
                     """
                     # Calculate the slope of the point to the bottom left of the buoy
                     m1 = slope(p, (buoy_x1, buoy_y2), 3)
@@ -242,3 +258,6 @@ def has_race_started(t0, time_to_start):
     if math.ceil((time.time() - t0)) > time_to_start * 60:
         return True
     return False
+
+def get_direction_of_travel():
+    return input('Are boats travelling left to right or right to left? For left to right press 1, for right to left press 2.')

@@ -1,7 +1,7 @@
 import cv2
 
 # Find the extreme points on a boat
-def get_extreme_point(img):
+def get_extreme_point(img, mode):
 
     # Ignore images that are too small to process
     h, w = img.shape[:2]
@@ -44,13 +44,27 @@ def get_extreme_point(img):
     # Get the points that are within 90% of the maximum x point
     points = []
     max_x = max(temp_x)
-    for x,y in zip(temp_x, temp_y):
-        if x < max_x*0.9:
-            continue
-        points.append((x, y))
+    if mode == 1:
+        for x,y in zip(temp_x, temp_y):
+            if x < max_x*0.9:
+                continue
+            points.append((x, y))
 
-    # Sort the points by x coord from high to low and return top 10
-    sorted_by_x = sorted(points, key=lambda tup: tup[0])
-    sorted_by_x = sorted_by_x[::-1]
+        # Sort the points by x coord from high to low and return top 10
+        sorted_by_x = sorted(points, key=lambda tup: tup[0])
+        sorted_by_x = sorted_by_x[::-1]
+    else:
+        for x, y in zip(temp_x, temp_y):
+            if x > max_x * 0.1:
+                continue
+            points.append((x, y))
+
+        # Sort the points by x coord from high to low and return top 10
+        sorted_by_x = sorted(points, key=lambda tup: tup[0])
+        #sorted_by_x = sorted_by_x[::-1]
+        for p in sorted_by_x:
+            cv2.circle(img, p, 3, (0,255,0), 2)
+        cv2.imshow('coords', img)
+        cv2.waitKey(0)
 
     return sorted_by_x[:10]

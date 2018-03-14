@@ -24,10 +24,10 @@ def track_buoy(frame, buoy = [], last_location = []):
     if xCoord != 100 and yCoord != 100:
         #Find the buoy - only performed when user clicks the screen to select the buoy
         if count ==0:
-            # distance = input('Approximately how far away is the buoy?')
-            # colour = raw_input('What is the main colour of the buoy?')
-            distance = 150
-            colour = ''
+            distance = input('Approximately how far away is the buoy?')
+            colour = raw_input('What is the main colour of the buoy?')
+            # distance = 150
+            # colour = ''
             #get approx size of buoy
             size = calc_range(distance)
             #Get buoy image
