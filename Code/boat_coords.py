@@ -5,19 +5,28 @@ def get_extreme_point(img):
 
     # Ignore images that are too small to process
     h, w = img.shape[:2]
+
     if h < 10 or w < 10:
         return None
+
 
     # Detect contours in the image
     gray = cv2.cvtColor(img.copy(), cv2.COLOR_BGR2GRAY)
     _, thresh = cv2.threshold(gray.copy(), 127, 255, cv2.THRESH_BINARY_INV)
     _, cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.THRESH_BINARY_INV)
 
+    # for c in cnts:
+    #     cv2.drawContours(img, c, -1, (255,0,0))
+    # cv2.imshow('boat', img)
+    # cv2.waitKey(0)
     temp_x = []
     temp_y = []
 
     # Only care about the bottom third of the boat as that will protrude the most
-    thresh = (2.0/3.0)*float(h)
+    if h < 100 and w < 100:
+        thresh = 0
+    else:
+        thresh = (2.0/3.0)*float(h)
 
     # Re-format list so that it is a list of points
     flat_list = [internal_item for sublist in cnts for item in sublist for internal_item in item]

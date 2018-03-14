@@ -26,17 +26,22 @@ def record_race():
     #cam = cv2.VideoCapture(0)
     #cam = cv2.VideoCapture('../res/sailing.mov')
     #cam = cv2.VideoCapture('../res/olympic_sailing_short.mp4')
-    #cam = cv2.VideoCapture('../res/new_race_1.mov')
+    #cam = cv2.VideoCapture('../res/new_race_2.mov')
     cam = cv2.VideoCapture('../res/KishRace6BoatCloseShort.mp4')
+    #cam = cv2.VideoCapture('../res/KishRace5.mp4')
 
-    setup(cam)
+    #setup(cam)
 
     #out = cv2.VideoWriter('../res/sample_output.avi', -1, 23.0, (1280,720))
 
     #Buoy and its location are initially unknown
     buoy = []
+    initial_buoy_image = []
     last_x1, last_y1, last_x2, last_y2 = 0, 0, 0, 0
     buoy_x1, buoy_y1, buoy_x2, buoy_y2 = 0, 0, 0, 0
+
+    # Record previous line crossings so each boat is only recorded once
+    line_crossing = []
 
     # Counters for saving the images of line crossings
     boat_crossing_counter = 0
@@ -46,7 +51,7 @@ def record_race():
     frame_counter = 1
 
     # Get the time left until race starts so false starts can be detected
-    time_to_start = 1
+    time_to_start = 0
     #time_to_start = input('How long until the race begins in minutes?')
 
     #Start time of video reading
@@ -61,6 +66,9 @@ def record_race():
         # Get the height and width of the frame
         h, w = frame.shape[:2]
 
+        # Realistically shouldn't have boats crossing within 50 pixels of each other within ~4 seconds
+        if frame_counter % 100 == 0:
+            line_crossing = []
 
         """**********Buoy*********"""
         """ 
@@ -69,14 +77,14 @@ def record_race():
             or it has moved by more than twice its size keep it in the last known location. 
             The user can manually reset the location if the buoy is lost. 
         """
-        if (frame_counter % 5 == 0 or frame_counter == 1):
-            buoy_x1, buoy_y1, buoy_x2, buoy_y2, buoy, user_change = track_buoy(frame.copy(), buoy)
+        if (frame_counter % 3 == 0 or frame_counter == 1):
+            buoy_x1, buoy_y1, buoy_x2, buoy_y2, buoy, user_change = track_buoy(frame.copy(), buoy, [last_x1, last_y1, last_x2, last_y2])
             buoy_size = buoy.shape[:2]
-            if ((buoy_x1 == 0.0 and buoy_y1 == 0.0) or ((abs(buoy_x1 - last_x1) > 2*buoy_size[0] or abs(buoy_y1 - last_y1) > 2*buoy_size[1]) and frame_counter > 1)) and not user_change:
+            if ((buoy_x1 == 0.0 and buoy_y1 == 0.0) or (abs(buoy_x1 - last_x1) > buoy_size[0] or abs(buoy_y1 - last_y1) > buoy_size[1]) and frame_counter > 1) and not user_change:#  and frame_counter %23 != 0:
                 buoy_x1, buoy_y1, buoy_x2, buoy_y2 = last_x1, last_y1, last_x2, last_y2
 
         # Assuming that the center of the camera/video is one end of start/finish line
-        m = slope((w/2, h), (buoy_x1, buoy_y2))
+        m = slope((w/2, h), (buoy_x1, buoy_y2), 2)
 
         # Remember the last location of the buoy
         last_x1, last_y1, last_x2, last_y2 = buoy_x1, buoy_y1, buoy_x2, buoy_y2
@@ -86,18 +94,18 @@ def record_race():
         """ Only want to detect boats every n frames and on first frame
             We need to create a seperate tracker for each boat
             """
-        if frame_counter % 23 == 0 or frame_counter == 1:
-            boats, coords = detect_boats(frame[0:h, 0:int(buoy_x1)])
+        if frame_counter % 5 == 0 or frame_counter == 1:
+            if buoy_x1 == 0:
+                continue
+            boats, coords = detect_boats(frame[0:h, 0:int(buoy_x1)+100])
             trackers = []
-            line_crossing = set([])
             for obj in range(0, len(boats), 1):
                 # Initialize tracker with first frame and bounding box
                 tracker = cv2.TrackerMedianFlow_create()
                 trackers.append(tracker)
 
         # Track boats that were detected on the last detection
-        else:
-            for i, c in enumerate(coords):
+        for i, c in enumerate(coords):
 
                 # Only concerned with boats that are close to the line
                 if c[2] > buoy_x1 or c[2] < w/2:
@@ -144,7 +152,6 @@ def record_race():
                 # Extreme points are relative to boat_img not the entire frame, add boat coords to extreme points
                 new_points = [(extreme_points[i][0] + p1[0], extreme_points[i][1]+p1[1]) for i in range(0, len(extreme_points))]
 
-                # Check if any point is on the finish line
                 for p in new_points:
 
                     # Ignore points that are not close to the line
@@ -152,27 +159,31 @@ def record_race():
                         continue
                     # Ignore points near points that have been detected as crossing the line since last boat detection
                     if len(line_crossing) != 0:
+                        #print line_crossing
                         for l in line_crossing:
-                            if abs(l[0] - p[0]) < 50 or abs(l[1] - p[1]) < 50:
+                            if abs((l[1]+l[0]) - (p[1]+p[0])) < 50:
                                 p = None
                                 break
                     if p == None:
                         continue
 
                     # Show the point on the screen
-                    cv2.circle(frame, p, 5, (0,0,255), thickness=3)
+                    cv2.circle(frame, p, 1, (0,0,255), thickness=1)
 
                     """
                         TO DO: INCLUDE DIRECTION OF TRAVEL IN SLOPE CALCULATION
                     """
                     # Calculate the slope of the point to the bottom left of the buoy
-                    m1 = slope(p, (buoy_x1, buoy_y2))
+                    m1 = slope(p, (buoy_x1, buoy_y2), 3)
+
+                    # if p[1] < h/2:
+                    #     print m1, m
 
                     # If the slopes match then the point is on the finish line and we have detected line crossing
-                    if m1 == m:
 
+                    if m1 > m-.1 and m1 < m+.1:
                         # Add point of intersection to detected points to avoid repetition
-                        line_crossing.add(p)
+                        line_crossing.append(p)
 
                         # Create a copy of the image to save as proof of intersection
                         proof_img = frame.copy()
@@ -200,7 +211,7 @@ def record_race():
 
                         boat_crossing_counter += 1
                         cv2.imwrite('../res/Screen-Shots/Finishes/{}.png'.format(boat_crossing_counter), proof_img)
-                        print 'Intersection at: {}'.format(p)
+                        print 'Intersection at: {} at frame : {}'.format(p, frame_counter+1)
 
                         # No need to continue to loop if this boat has already crossed the line
                         break
