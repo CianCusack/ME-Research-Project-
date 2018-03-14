@@ -131,25 +131,25 @@ def detect_digits(img):
 
 
 def get_sail_number(img):
-    numbers = pd.read_csv('../res/sample sail numbers.csv', dtype={'ID': str})
-    nums = [str(num[0]) for num in numbers.values]
 
     imgs, mode = detect_digits(img)
     if mode == 1:
         imgs = four_point_transform(imgs, 0)
     if mode == -1 or imgs == None:
-        return
+        return []
     digits = []
     for i, img in enumerate(imgs):
         if i == 0 and mode == 1:
             img = cv2.flip(img, 1)
         digits.append(recognise_digits(img))
-    print digits
+
+    if digits[0] == '' and len(digits) == 1:
+        return []
+
+    numbers = pd.read_csv('../res/sample sail numbers.csv', dtype={'ID': str})
+    nums = [str(num[0]) for num in numbers.values]
 
     results = []
-
     results.append(difflib.get_close_matches(digits[0], nums))
-    if len(results) == 0:
-        return 0
 
     return results[0]

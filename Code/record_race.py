@@ -168,7 +168,7 @@ def record_race():
                         continue
 
                     # Show the point on the screen
-                    cv2.circle(frame, p, 1, (0,0,255), thickness=1)
+                    # cv2.circle(frame, p, 1, (0,0,255), thickness=1)
 
                     """
                         TO DO: INCLUDE DIRECTION OF TRAVEL IN SLOPE CALCULATION
@@ -195,7 +195,11 @@ def record_race():
                         # If the boat image is big enough attempt to read sail numbers
                         if (boat_img.shape[1] > 50):
                             sail_number = get_sail_number(boat_img)
-
+                            if len(sail_number) == 0:
+                                print 'Unable to recognise sail number'
+                                """
+                                    TO DO: Raise an exception regarding unidentified boat
+                                """
 
                         # If the intersection occurs before the race starts it is a false start
                         if not has_race_started(t0, time_to_start):
@@ -211,7 +215,7 @@ def record_race():
 
                         boat_crossing_counter += 1
                         cv2.imwrite('../res/Screen-Shots/Finishes/{}.png'.format(boat_crossing_counter), proof_img)
-                        print 'Intersection at: {} at frame : {}'.format(p, frame_counter+1)
+                        print 'Intersection at: {} by boat : {}'.format(p, sail_number)
 
                         # No need to continue to loop if this boat has already crossed the line
                         break
