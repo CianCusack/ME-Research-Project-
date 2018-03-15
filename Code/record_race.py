@@ -2,7 +2,7 @@ from Buoy_Detection import *
 import math
 import time
 
-from imutils import contours
+from imutils import rotate
 
 from Buoy_Detection import *
 from boat_detector import *
@@ -12,12 +12,14 @@ from boat_coords import *
 from digit_recognition import *
 
 
-def setup(cam):
+def setup(cam, mode):
     ## Show user first frame and have them select the buoy
     display = cv2.namedWindow('image')
     cv2.setMouseCallback('image', buoy_points)
     ver, first = cam.read()
-    first = cv2.flip(first, 1)
+   # first = rotate(first, 90)
+    if mode == 2:
+        first = cv2.flip(first, 1)
     cv2.imshow('image', first)
     cv2.waitKey(3000)
     #cv2.destroyWindow('image')
@@ -27,13 +29,17 @@ def record_race():
     #cam = cv2.VideoCapture(0)
     #cam = cv2.VideoCapture('../res/sailing.mov')
     #cam = cv2.VideoCapture('../res/olympic_sailing_short.mp4')
-    #cam = cv2.VideoCapture('../res/new_race_2.mov')
-    cam = cv2.VideoCapture('../res/KishRace6BoatCloseShort.mp4')
-    #cam = cv2.VideoCapture('../res/KishRace5.mp4')
+    #cam = cv2.VideoCapture('../res/new_race_3.mov')
+    #cam = cv2.VideoCapture('../res/horizontal_race.mov')
+    #cam = cv2.VideoCapture('../res/KishRace6BoatCloseShort.mp4')
+    cam = cv2.VideoCapture('../res/KishRace1.mp4')
 
-    setup(cam)
+    # mode = get_direction_of_travel()
 
-    mode = get_direction_of_travel()
+    mode = 1
+    setup(cam, mode)
+
+
 
     #out = cv2.VideoWriter('../res/sample_output.avi', -1, 23.0, (1280,720))
 
@@ -67,12 +73,13 @@ def record_race():
             break
 
         #For testing direction of travel
-        frame = cv2.flip(frame, 1)
+        if mode == 2:
+            frame = cv2.flip(frame, -1)
         # Get the height and width of the frame
         h, w = frame.shape[:2]
 
         # Realistically shouldn't have boats crossing within 50 pixels of each other within ~4 seconds
-        if frame_counter % 100 == 0:
+        if frame_counter % 240 == 0:
             line_crossing = []
 
         """**********Buoy*********"""
@@ -83,7 +90,7 @@ def record_race():
             The user can manually reset the location if the buoy is lost. 
         """
         if (frame_counter % 3 == 0 or frame_counter == 1):
-            buoy_x1, buoy_y1, buoy_x2, buoy_y2, buoy, user_change = track_buoy(frame.copy(), buoy, [last_x1, last_y1, last_x2, last_y2])
+            buoy_x1, buoy_y1, buoy_x2, buoy_y2, buoy, user_change = track_buoy(frame, buoy, [last_x1, last_y1, last_x2, last_y2])
             buoy_size = buoy.shape[:2]
             if ((buoy_x1 == 0.0 and buoy_y1 == 0.0) or (abs(buoy_x1 - last_x1) > buoy_size[0] or abs(buoy_y1 - last_y1) > buoy_size[1]) and frame_counter > 1) and not user_change:#  and frame_counter %23 != 0:
                 buoy_x1, buoy_y1, buoy_x2, buoy_y2 = last_x1, last_y1, last_x2, last_y2
@@ -115,10 +122,10 @@ def record_race():
 
         # Track boats that were detected on the last detection
         for i, c in enumerate(coords):
-                # Only concerned with boats that are close to the line
-                if mode == 1 and (c[2] > buoy_x1 or c[2] < w/2):
+                # Only concerned with boats that are close to the line i.e. between the start of the line and the buoy
+                if mode == 1 and ((c[2] > buoy_x1 and c[2] > w/2) or (c[2] < buoy_x1 and c[2] < w/2)):
                     continue
-                elif mode == 2 and (c[0] < buoy_x1 or c[0] > w/2):
+                elif mode == 2 and ((c[0] > buoy_x2 and c[0] > w/2) or (c[0] < buoy_x2 and c[0] < w/2)):
                     continue
 
                 #cv2.rectangle(frame, (c[0], c[1]), (c[2], c[3]), (255,0,0), 2)
@@ -144,7 +151,7 @@ def record_race():
                     continue
 
                 # Extract boat image from original image for processing
-                boat_img = frame[p1[1]:p2[1], p1[0]:p2[0]].copy()
+                boat_img = frame[p1[1]:p2[1], p1[0]:p2[0]]
 
 
                 # Discard boats that are too small to process meaningfully
@@ -259,5 +266,8 @@ def has_race_started(t0, time_to_start):
         return True
     return False
 
+"""
+    TO DO: Add error checking to inputs
+"""
 def get_direction_of_travel():
     return input('Are boats travelling left to right or right to left? For left to right press 1, for right to left press 2.')

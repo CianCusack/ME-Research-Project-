@@ -24,7 +24,7 @@ def get_extreme_point(img, mode):
 
     # Only care about the bottom third of the boat as that will protrude the most
     if h < 100 and w < 100:
-        thresh = 0
+        thresh = (1.0/4.0)*h
     else:
         thresh = (2.0/3.0)*float(h)
 
@@ -62,9 +62,9 @@ def get_extreme_point(img, mode):
         # Sort the points by x coord from high to low and return top 10
         sorted_by_x = sorted(points, key=lambda tup: tup[0])
         #sorted_by_x = sorted_by_x[::-1]
-        for p in sorted_by_x:
-            cv2.circle(img, p, 3, (0,255,0), 2)
-        cv2.imshow('coords', img)
-        cv2.waitKey(0)
+        # for p in sorted_by_x:
+        #     cv2.circle(img, p, 3, (0,255,0), 2)
+        # cv2.imshow('coords', img)
+        # cv2.waitKey(0)
 
     return sorted_by_x[:10]
