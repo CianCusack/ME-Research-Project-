@@ -6,14 +6,9 @@ net = cv2.dnn.readNetFromCaffe("../deep learning/MobileNetSSD_deploy.prototxt.tx
                                    "../deep learning/MobileNetSSD_deploy.caffemodel")
 
 def detect_boats(image):
+
     global net
     confidence_thresh = 0.1
-
-    # Really only care about boats but can detect others
-    classes = ["background", "aeroplane", "bicycle", "bird", "boat",
-		"bottle", "bus", "car", "cat", "chair", "cow", "dining table",
-		"dog", "horse", "motorbike", "person", "potted plant", "sheep",
-		"sofa", "train", "tv monitor"]
 
     # current frame is used to construct an input blob by resizing it to a
     # fixed 300x300 pixels and then normalizing it

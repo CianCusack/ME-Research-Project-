@@ -2,7 +2,6 @@ import numpy as np
 from template_matching import *
 from colour_detection import track_buoy_by_colour
 
-
 # Initialise global variables
 yCoord = 296
 xCoord = 777
@@ -24,14 +23,15 @@ def track_buoy(frame, buoy = [], last_location = []):
     if xCoord != 100 and yCoord != 100:
         #Find the buoy - only performed when user clicks the screen to select the buoy
         if count ==0:
-            # distance = input('Approximately how far away is the buoy?')
-            # colour = raw_input('What is the main colour of the buoy?')
-            distance = 200
-            colour = ''
+            distance = input('Approximately how far away is the buoy?')
+            colour = raw_input('What is the main colour of the buoy?')
+            # distance = 200
+            # colour = ''
             #get approx size of buoy
             size = calc_range(distance)
             #Get buoy image
             buoy = frame[yCoord - size:yCoord + size, xCoord - size:xCoord + size].copy()
+
             count += 1
             manual_change = True
         """ 
@@ -40,7 +40,7 @@ def track_buoy(frame, buoy = [], last_location = []):
             then it is most likely the buoy we want
         """
         # Use correlation to detect buoy in frame
-        x1, y1, x2, y2 = match_template(frame, buoy, last_location, distance)
+        x1, y1, x2, y2 = match_template(frame, buoy, last_location, distance, manual_change)
 
         # At greater distances the colour/size of the buoy can make it difficult to find using colour detection
         if distance < 100:
@@ -57,18 +57,17 @@ def track_buoy(frame, buoy = [], last_location = []):
             center_1 = (int((x2-x1)/2), int((y2-y1)/2))
             center_2 = (int((x2_c - x1_c) / 2), int((y2_c - y1_c) / 2))
 
-            # cv2.rectangle(frame, (x1, y1), (x2, y2), (0,255,0), 2)
-            # cv2.rectangle(frame, (x1_c, y1_c), (x2_c, y2_c), (0,0,255), 2)
-            # cv2.imshow('frame', frame)
-            # cv2.waitKey(0)
             # Find the distance between the two centroids
             d = (abs(center_1[0]- center_2[0]), abs(center_1[0]- center_2[0]))
 
             # If the distance is too large assume neither reading is reliable and return no buoy found
             if d[0] > x2-x1 or d[1] > y2 -y1:
                 return 0, 0, 0, 0, buoy, manual_change
+
         return float(x1),float(y1),float(x2),float(y2), buoy, manual_change
+
     else:
+
         return 0,0,0,0, buoy, manual_change
 
 
@@ -77,6 +76,9 @@ def calc_range(distance):
     return int(size/(2*distance))
 
 
+"""
+    TO DO: Add more colours
+"""
 def get_colour_for_tracking(colour):
     return {
         'red': (np.array([0, 0, 50]),  np.array([50, 50, 255])),

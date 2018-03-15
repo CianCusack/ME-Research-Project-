@@ -1,12 +1,15 @@
-import numpy as np
-import cv2
 from four_point_transform import *
 from recognise_numbers import *
 import difflib
 import pandas as pd
-import math
 
+"""
+    TO DO: Fix inefficiency of this awful code
+"""
+
+# Attempt to identify row of sail numbers
 def get_sail_number_line(boxes, img):
+
     xs = []
     ys = []
     hs = []
@@ -56,31 +59,39 @@ def get_sail_number_line(boxes, img):
 
     return sail_imgs
 
+
 def detect_digits(img):
+
+    # Ignore images that are too small
     h, w = img.shape[:2]
     if h * w < 200:
         return None, -1
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    # Get mser, and set parameters
+    # Get MSER, and set parameters - may need to play with max
+    # and min value possibly with regard to the size of the boat
     mser = cv2.MSER_create()
     mser.setMinArea(60)
     mser.setMaxArea(200)
 
-    # Do mser detection, get the coodinates and bboxes
+    # Do MSER detection, get the coordinates and bounding boxes of possible text areas
     coordinates, bboxes = mser.detectRegions(gray)
 
-    # Filter the coordinates
+    # If no text found, return
     if len(coordinates) == 0:
         return None, -1
 
+    # Sort the coordinates
     coordinates, _ = sort_contours(coordinates, 'top-to-bottom')
+
     coords = []
     boxes = []
     angles = []
-    i = 0
+
     for coord in coordinates:
+
+        #Get bounding box of the text area and remove areas too small to process
         bbox = cv2.boundingRect(coord)
         x,y,w1,h1 = bbox
         if w1< 8 or h1 < 15 or w1 > h1 or h1/w1 > 10:
@@ -88,6 +99,8 @@ def detect_digits(img):
 
         coords.append(coord)
         boxes.append(bbox)
+
+        # Get the angle of rotation of the text areaa
         rect = cv2.minAreaRect(coord)
         theta =  abs(rect[2]/45)
         if theta == 0 or theta == 1:
@@ -98,14 +111,14 @@ def detect_digits(img):
         return None, -1
 
     average_angle =  sum(angles)/len(angles)
-    canvas3 = np.zeros([img.shape[0],img.shape[1],3],dtype=np.uint8)
-    canvas3[:] = [255, 255, 255] # or img[:] = 255
     mode = 0
 
     # Determine if the angle of the sail numbers is small enough to ignore
     if 2 - average_angle < 0.8 or 2-average_angle > 1.2:
         sail_imgs = get_sail_number_line(boxes, img)
         mode = 1
+
+    # Extract each of the images of a number
     else:
         xs = []
         ys = []
@@ -132,23 +145,35 @@ def detect_digits(img):
 
 def get_sail_number(img):
 
+    # Attempt to get the sail numbers
     imgs, mode = detect_digits(img)
+
+    #Rotate if necessary
     if mode == 1:
         imgs = four_point_transform(imgs, 0)
+
+    # If no numbers found, return
     if mode == -1 or imgs == None:
         return []
+
+    # Attempt to recognise the numbers
     digits = []
     for i, img in enumerate(imgs):
         if i == 0 and mode == 1:
+
+            # One of the identified sail number areas will be mirrored
             img = cv2.flip(img, 1)
         digits.append(recognise_digits(img))
 
+    # If no sail numbers are recognised, return
     if digits[0] == '' and len(digits) == 1:
         return []
 
+    # Read in sail numbers of boats in the race and convert to string array
     numbers = pd.read_csv('../res/sample sail numbers.csv', dtype={'ID': str})
     nums = [str(num[0]) for num in numbers.values]
 
+    # Identify closest match to sail number
     results = []
     results.append(difflib.get_close_matches(digits[0], nums))
 

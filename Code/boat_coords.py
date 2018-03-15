@@ -15,10 +15,6 @@ def get_extreme_point(img, mode):
     _, thresh = cv2.threshold(gray.copy(), 127, 255, cv2.THRESH_BINARY_INV)
     _, cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.THRESH_BINARY_INV)
 
-    # for c in cnts:
-    #     cv2.drawContours(img, c, -1, (255,0,0))
-    # cv2.imshow('boat', img)
-    # cv2.waitKey(0)
     temp_x = []
     temp_y = []
 
@@ -44,6 +40,7 @@ def get_extreme_point(img, mode):
     # Get the points that are within 90% of the maximum x point
     points = []
     max_x = max(temp_x)
+
     if mode == 1:
         for x,y in zip(temp_x, temp_y):
             if x < max_x*0.9:
@@ -53,7 +50,10 @@ def get_extreme_point(img, mode):
         # Sort the points by x coord from high to low and return top 10
         sorted_by_x = sorted(points, key=lambda tup: tup[0])
         sorted_by_x = sorted_by_x[::-1]
+
+    # get lowest 10% of points for right to left travel
     else:
+
         for x, y in zip(temp_x, temp_y):
             if x > max_x * 0.1:
                 continue
@@ -61,10 +61,5 @@ def get_extreme_point(img, mode):
 
         # Sort the points by x coord from high to low and return top 10
         sorted_by_x = sorted(points, key=lambda tup: tup[0])
-        #sorted_by_x = sorted_by_x[::-1]
-        # for p in sorted_by_x:
-        #     cv2.circle(img, p, 3, (0,255,0), 2)
-        # cv2.imshow('coords', img)
-        # cv2.waitKey(0)
 
     return sorted_by_x[:10]
