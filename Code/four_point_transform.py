@@ -68,6 +68,6 @@ def four_point_transform(imgs, mode):
         dst = cv2.warpPerspective(img,M,(400,400))
 
         dst = cv2.resize(dst, (w,h))
-        cv2.imwrite('../res/Sail Numbers/individual/rotated/{}.png'.format(count), dst)
+        # cv2.imwrite('../res/Sail Numbers/individual/rotated/{}.png'.format(count), dst)
         images.append(dst)
     return images

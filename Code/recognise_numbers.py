@@ -30,16 +30,11 @@ def sort_contours(cnts, method="left-to-right"):
 
 def recognise_digits(img):
 
-    # create and train kNN model
-    samples = np.loadtxt('generalsamples.data', np.float32)
-    responses = np.loadtxt('generalresponses_slanted.data', np.float32)
-    responses = responses.reshape((responses.size, 1))
-    model = cv2.ml.KNearest_create()
-    model.train(samples, cv2.ml.ROW_SAMPLE, responses)
 
-    strings = np.array([])
+
+
     images = []
-
+    strings = []
     # Increase image size so edges are easier to detect
     h, w = img.shape[:2]
     if h < 30:
@@ -78,38 +73,54 @@ def recognise_digits(img):
 
     for img in images:
 
-        # Within each individual image find the contours
-        gray = cv2.cvtColor(img.copy(), cv2.COLOR_BGR2GRAY)
-        thresh = cv2.adaptiveThreshold(gray, 255, 1, 1, 11, 2)
-        _,contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        strings.append(guess_numbers(img))
 
-        results = np.array([])
-        for cnt in contours:
-            if cv2.contourArea(cnt) > 40:
-                [x, y, w, h] = cv2.boundingRect(cnt)
 
-                if h > 28:
-
-                    roi = thresh[y:y + h, x:x + w]
-                    roismall = cv2.resize(roi, (10, 10))
-                    roismall = roismall.reshape((1, 100))
-                    roismall = np.float32(roismall)
-
-                    # Use kNN model to try identify digit
-                    retval, results, neigh_resp, dists = model.findNearest(roismall, k=1)
-
-                    value = int((results[0][0]))
-                    results = np.append(results, value)
-
-        # If multiple numbers are found in image take number with greatest number of occurrences
-        if len(results) > 0:
-
-            results = results.astype(int)
-            strings = np.append(strings, str(np.bincount(results).argmax()))
-
-        else:
-
-            strings = np.append(strings, '')
 
     return ''.join(strings)
 
+def guess_numbers(img):
+
+    strings = np.array([])
+
+    # create and train kNN model
+    samples = np.loadtxt('generalsamples.data', np.float32)
+    responses = np.loadtxt('generalresponses_slanted.data', np.float32)
+    responses = responses.reshape((responses.size, 1))
+    model = cv2.ml.KNearest_create()
+    model.train(samples, cv2.ml.ROW_SAMPLE, responses)
+
+    # Within each individual image find the contours
+    gray = cv2.cvtColor(img.copy(), cv2.COLOR_BGR2GRAY)
+    thresh = cv2.adaptiveThreshold(gray, 255, 1, 1, 11, 2)
+    _, contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    results = np.array([])
+    for cnt in contours:
+        if cv2.contourArea(cnt) > 40:
+            # cv2.drawContours(img, cnt, -1, (0,0,255), 2)
+            # cv2.imshow('detection', img)
+            # cv2.waitKey(0)
+            [x, y, w, h] = cv2.boundingRect(cnt)
+
+            if h > 28:
+                roi = thresh[y:y + h, x:x + w]
+                roismall = cv2.resize(roi, (10, 10))
+                roismall = roismall.reshape((1, 100))
+                roismall = np.float32(roismall)
+
+                # Use kNN model to try identify digit
+                retval, results, neigh_resp, dists = model.findNearest(roismall, k=1)
+
+                value = int((results[0][0]))
+                results = np.append(results, value)
+                # If multiple numbers are found in image take number with greatest number of occurrences
+            if len(results) > 0:
+
+                results = results.astype(int)
+                strings = np.append(strings, str(np.bincount(results).argmax()))
+
+            else:
+
+                strings = np.append(strings, '')
+    return  "".join(strings)

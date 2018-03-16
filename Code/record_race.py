@@ -206,7 +206,7 @@ def record_race():
                         # line and line crossing point
                         proof_img = frame.copy()
                         cv2.circle(proof_img, p, 2, (255, 0, 0), 2)
-                        draw_line_and_buoy(proof_img, draw_buoy)
+                        #draw_line_and_buoy(proof_img, draw_buoy)
 
                         # If the boat image is big enough attempt to read sail numbers
                         if (boat_img.shape[1] > 50):

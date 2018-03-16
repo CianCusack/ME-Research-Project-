@@ -1,5 +1,6 @@
 from four_point_transform import *
 from recognise_numbers import *
+from imutils import rotate
 import difflib
 import pandas as pd
 
@@ -63,8 +64,8 @@ def get_sail_number_line(boxes, img):
 def detect_digits(img):
 
     # Ignore images that are too small
-    h, w = img.shape[:2]
-    if h * w < 200:
+    height, width = img.shape[:2]
+    if height * width < 200:
         return None, -1
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -88,7 +89,15 @@ def detect_digits(img):
     coords = []
     boxes = []
     angles = []
+    last_max_x = width
+    last_height = 0
 
+    digit_counter = 0
+    row_counter = 0
+
+    row= []
+
+    digits = []
     for coord in coordinates:
 
         #Get bounding box of the text area and remove areas too small to process
@@ -100,12 +109,93 @@ def detect_digits(img):
         coords.append(coord)
         boxes.append(bbox)
 
-        # Get the angle of rotation of the text areaa
+        # Get rotated bounding box coordinates
         rect = cv2.minAreaRect(coord)
+        box = cv2.boxPoints(rect)
+        box = np.int0(box)
+
+        # for p in box:
+        #     cv2.circle(img, (p[0], p[1]), 2, (255,255,0), 2)
+
+        cv2.rectangle(img, (x, y), (x+w1, y+h1), (255,255,0), 1)
+
+        # Get the min and max y coordinates
+        min_x = width
+        max_x = 0
+        min_y = height
+        max_y = 0
+
+        for p in box:
+            if min_x > p[0]:
+                min_x = p[0]
+            if max_x < p[0]:
+                max_x = p[0]
+            if min_y > p[1]:
+                min_y = p[1]
+            if max_y < p[1]:
+                max_y = p[1]
+
+        # Text areas in covering same digit
+        if abs(last_max_x - max_x) < 5:
+            continue
+
+        # Ignore text areas that may be inside other text areas
+        if last_height - (max_y - min_y) > (1.0/4.0)*last_height:
+            continue
+
+        # If the x coordinate increases it is the start of a new row
+        if last_max_x < max_x:
+            print '********** New row detected **********'
+            print 'Detecting digits on digits set'
+            for r in row:
+                digits.append(guess_numbers(cv2.resize(r, (2*r.shape[1], 2*r.shape[0]))))
+            print ''.join(digits)
+            # Read in sail numbers of boats in the race and convert to string array
+            numbers = pd.read_csv('../res/sample sail numbers.csv', dtype={'ID': str})
+            nums = [str(num[0]) for num in numbers.values]
+
+            # Identify closest match to sail number
+            print (difflib.get_close_matches(''.join(digits), nums))
+
+            print 'Detecting digits on mirrored digits'
+            digits = []
+            for r in row:
+                r = cv2.flip(r, 1)
+                digits.append(guess_numbers(cv2.resize(r, (2*r.shape[1], 2*r.shape[0]))))
+
+            print ''.join(digits)
+            # Read in sail numbers of boats in the race and convert to string array
+            numbers = pd.read_csv('../res/sample sail numbers.csv', dtype={'ID': str})
+            nums = [str(num[0]) for num in numbers.values]
+
+            # Identify closest match to sail number
+            print (difflib.get_close_matches(''.join(digits), nums))
+            print 'Detecting digits on mirrored digits'
+            digits = []
+
+            digits = []
+            row = []
+
+        # Extract the detected digit
+        digit = img[min_y : max_y, min_x : max_x]
+
+
+        # Rotate the extracted digit
+        rotated = rotate(digit, rect[2])
+
+        digit_counter += 1
+
+        row.append(digit)
+        last_max_x = max_x
+        last_height = digit.shape[0]
+
         theta =  abs(rect[2]/45)
         if theta == 0 or theta == 1:
             continue
         angles.append(theta)
+
+    cv2.imshow('img', img)
+    cv2.waitKey(0)
 
     if len(angles) == 0:
         return None, -1
@@ -178,3 +268,7 @@ def get_sail_number(img):
     results.append(difflib.get_close_matches(digits[0], nums))
 
     return results[0]
+
+
+# print get_sail_number(cv2.imread('../res/sail_numbers_cropped.jpg'))
+print get_sail_number(cv2.imread('../res/Screen-Shots/Finishes/2.png'))
