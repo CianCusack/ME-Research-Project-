@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from imutils import rotate
 
 def sort_contours(cnts, method="left-to-right"):
 
@@ -106,12 +107,31 @@ def guess_numbers(img):
                 roismall = cv2.resize(roi, (10, 10))
                 roismall = roismall.reshape((1, 100))
                 roismall = np.float32(roismall)
-                # cv2.imshow('roismall', roi)
-                # cv2.waitKey(0)
-                # Use kNN model to try identify digit
-                retval, results, neigh_resp, dists = model.findNearest(roismall, k=9)
 
-                value = int((results[0][0]))
+                # Use kNN model to try identify digit
+                value, results, neigh_resp, dists = model.findNearest(roismall, k=11)
+                print value, results, neigh_resp, dists
+
+                roi = rotate(roi, -15)
+                roismall = cv2.resize(roi, (10, 10))
+                roismall = roismall.reshape((1, 100))
+                roismall = np.float32(roismall)
+
+                # Use kNN model to try identify digit
+                value, results, neigh_resp, dists = model.findNearest(roismall, k=11)
+                print value, results, neigh_resp, dists
+
+                roi = cv2.flip(roi, 1)
+                roismall = cv2.resize(roi, (10, 10))
+                roismall = roismall.reshape((1, 100))
+                roismall = np.float32(roismall)
+
+                # Use kNN model to try identify digit
+                value, results, neigh_resp, dists = model.findNearest(roismall, k=11)
+                print value, results, neigh_resp, dists
+
+                cv2.imshow('roismall', roi)
+                cv2.waitKey(0)
                 results = np.append(results, value)
                 # If multiple numbers are found in image take number with greatest number of occurrences
             if len(results) > 0:
@@ -122,4 +142,5 @@ def guess_numbers(img):
             else:
 
                 strings = np.append(strings, '')
+
     return  "".join(strings)

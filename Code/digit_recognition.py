@@ -166,10 +166,10 @@ def detect_digits(img):
             coords.append(coord)
             boxes.append(bbox)
 
-    # cv2.rectangle(img, (x, y), (x + w1, y + h1), (255, 255, 0), 1)
+    #     cv2.rectangle(img, (x, y), (x + w1, y + h1), (255, 255, 0), 1)
     # cv2.imshow('img_temp', img)
     # cv2.waitKey(0)
-    print len(boxes)
+    #print len(boxes)
     #     # If the x coordinate increases it is the start of a new row
     #     if last_max_x < max_x:
     #         print '********** New row detected **********'
@@ -272,7 +272,7 @@ def detect_digits(img):
             continue
 
         if abs(last_y - y) > h/2:
-            print 'new row'
+            # print 'new row'
             rows.append(row_length)
             row_length = 0
 
@@ -337,7 +337,7 @@ def get_sail_number(img):
 
     # Attempt to recognise the numbers
     digits = []
-    for i, img in enumerate(imgs):
+    for i, img in enumerate(imgs[:12]):
         # cv2.imshow('img', img)
         # cv2.waitKey(0)
         digits.append(recognise_digits(img))
@@ -356,7 +356,7 @@ def get_sail_number(img):
             i += 1
         prev+=r
         sail_numbers.append(''.join(final))
-    print sail_numbers
+    #print sail_numbers
     # Read in sail numbers of boats in the race and convert to string array
     numbers = pd.read_csv('../res/sample sail numbers.csv', dtype={'ID': str})
     nums = [str(num[0]) for num in numbers.values]
@@ -374,9 +374,8 @@ def get_sail_number(img):
     return results
 
 
-
 sail_nums =  get_sail_number(cv2.imread('../res/sail_numbers_cropped.jpg'))
-sail_nums =  get_sail_number(cv2.imread('../res/test/test1.png'))
+#sail_nums =  get_sail_number(cv2.imread('../res/test/test1.png'))
 for num in sail_nums:
     print num
 # img = cv2.imread('../res/boat.jpg')
