@@ -74,13 +74,13 @@ def recognise_digits(img):
 
         strings.append(guess_numbers(img))
 
-
-
-    return ''.join(strings)
+    return strings
 
 def guess_numbers(img):
 
     strings = np.array([])
+    strings_rotated = np.array([])
+    strings_rotated_mirrored = np.array([])
 
     # create and train kNN model
     samples = np.loadtxt('generalsamples.data', np.float32)
@@ -95,6 +95,9 @@ def guess_numbers(img):
     _, contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     results = np.array([])
+    results_rotated = np.array([])
+    results_rotated_mirrored = np.array([])
+
     for cnt in contours:
         if cv2.contourArea(cnt) > 40:
             # cv2.drawContours(img, cnt, -1, (0,0,255), 2)
@@ -109,8 +112,9 @@ def guess_numbers(img):
                 roismall = np.float32(roismall)
 
                 # Use kNN model to try identify digit
-                value, results, neigh_resp, dists = model.findNearest(roismall, k=11)
-                print value, results, neigh_resp, dists
+                value, result, neigh_resp, dists = model.findNearest(roismall, k=11)
+                cv2.imshow('roismall', roi)
+                print 'Original {}, {}, {}'.format(value, result, neigh_resp)
 
                 roi = rotate(roi, -15)
                 roismall = cv2.resize(roi, (10, 10))
@@ -118,8 +122,9 @@ def guess_numbers(img):
                 roismall = np.float32(roismall)
 
                 # Use kNN model to try identify digit
-                value, results, neigh_resp, dists = model.findNearest(roismall, k=11)
-                print value, results, neigh_resp, dists
+                value_rotated, result, neigh_resp, dists = model.findNearest(roismall, k=11)
+                cv2.imshow('roismall rotated', roi)
+                print 'Rotated {}, {}, {}'.format(value_rotated, result, neigh_resp)
 
                 roi = cv2.flip(roi, 1)
                 roismall = cv2.resize(roi, (10, 10))
@@ -127,20 +132,30 @@ def guess_numbers(img):
                 roismall = np.float32(roismall)
 
                 # Use kNN model to try identify digit
-                value, results, neigh_resp, dists = model.findNearest(roismall, k=11)
-                print value, results, neigh_resp, dists
+                value_rotated_mirrored, result, neigh_resp, dists = model.findNearest(roismall, k=11)
+                print 'Rotated and mirrored {}, {}, {}'.format(value_rotated_mirrored, result, neigh_resp)
 
-                cv2.imshow('roismall', roi)
-                cv2.waitKey(0)
+                cv2.imshow('roismall rotated, mirrored', roi)
+                cv2.waitKey(1)
+                cv2.destroyAllWindows()
+
                 results = np.append(results, value)
+                results_rotated = np.append(results_rotated, value_rotated)
+                results_rotated_mirrored = np.append(results_rotated_mirrored, value_rotated_mirrored)
                 # If multiple numbers are found in image take number with greatest number of occurrences
             if len(results) > 0:
 
                 results = results.astype(int)
+                results_rotated = results_rotated.astype(int)
+                results_rotated_mirrored = results_rotated_mirrored.astype(int)
                 strings = np.append(strings, str(np.bincount(results).argmax()))
+                strings_rotated = np.append(strings_rotated, str(np.bincount(results_rotated).argmax()))
+                strings_rotated_mirrored = np.append(strings_rotated_mirrored, str(np.bincount(results_rotated_mirrored).argmax()))
 
             else:
 
                 strings = np.append(strings, '')
-
-    return  "".join(strings)
+    x= ["".join(strings), "".join(strings_rotated), "".join(strings_rotated_mirrored)]
+    y = [results, results_rotated, results_rotated_mirrored]
+    print x, y
+    return  x

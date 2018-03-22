@@ -345,37 +345,50 @@ def get_sail_number(img):
     # If no sail numbers are recognised, return
     if digits == '' and len(digits) == 1:
         return []
-
-    prev = 0
-    sail_numbers = []
-    for r in rows:
-        i = 0
-        final = []
-        while i < r:
-            final.append(digits[i+prev])
-            i += 1
-        prev+=r
-        sail_numbers.append(''.join(final))
-    #print sail_numbers
-    # Read in sail numbers of boats in the race and convert to string array
-    numbers = pd.read_csv('../res/sample sail numbers.csv', dtype={'ID': str})
-    nums = [str(num[0]) for num in numbers.values]
-
-    # Identify closest match to sail number
+    norm = []
+    rot = []
+    rot_mir = []
+    for d in (digits):
+        norm.append(d[0][0])
+        rot.append(d[0][1])
+        rot_mir.append(d[0][2])
+    dig_arrays = [norm, rot, rot_mir]
     results = []
-    for num in sail_numbers:
-        res = difflib.get_close_matches(num, nums, cutoff=0.9 )
-        if len(res) == 0:
-            continue
-        results.append(res)
+    for d in dig_arrays:
+        prev = 0
+        sail_numbers = []
+        for r in rows:
+            i = 0
+            final = []
+            while i < r:
+                if i+prev < len(d):
+                    final.append(d[i+prev])
+                i += 1
+            #print final
+            prev+=r
+            sail_numbers.append(''.join(final))
+        print sail_numbers
+        # Read in sail numbers of boats in the race and convert to string array
+        numbers = pd.read_csv('../res/sample sail numbers.csv', dtype={'ID': str})
+        nums = [str(num[0]) for num in numbers.values]
 
-    if len(results) == 0:
-        return []
+        # Identify closest match to sail number
+
+        for num in sail_numbers:
+            res = difflib.get_close_matches(num, nums, cutoff=0.85 )
+            if len(res) == 0:
+                continue
+            results.append(res)
+
+        #print d
+
+        # if len(results) == 0:
+        #     return []
     return results
 
 
-sail_nums =  get_sail_number(cv2.imread('../res/sail_numbers_cropped.jpg'))
-#sail_nums =  get_sail_number(cv2.imread('../res/test/test1.png'))
+#sail_nums =  get_sail_number(cv2.imread('../res/sail_numbers_cropped.jpg'))
+sail_nums =  get_sail_number(cv2.imread('../res/test/test1.png'))
 for num in sail_nums:
     print num
 # img = cv2.imread('../res/boat.jpg')
