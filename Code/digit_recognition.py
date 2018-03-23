@@ -74,7 +74,7 @@ def detect_digits(img):
     # and min value possibly with regard to the size of the boat
     mser = cv2.MSER_create()
     #mser.setMinArea(60)
-    mser.setMaxArea(200)
+    #mser.setMaxArea(200)
 
     # Do MSER detection, get the coordinates and bounding boxes of possible text areas
     coordinates, bboxes = mser.detectRegions(gray)
@@ -166,9 +166,9 @@ def detect_digits(img):
             coords.append(coord)
             boxes.append(bbox)
 
-    #     cv2.rectangle(img, (x, y), (x + w1, y + h1), (255, 255, 0), 1)
-    # cv2.imshow('img_temp', img)
-    # cv2.waitKey(0)
+        cv2.rectangle(img, (x, y), (x + w1, y + h1), (255, 255, 0), 1)
+    cv2.imshow('img_temp', img)
+    cv2.waitKey(0)
     #print len(boxes)
     #     # If the x coordinate increases it is the start of a new row
     #     if last_max_x < max_x:
@@ -349,6 +349,8 @@ def get_sail_number(img):
     rot = []
     rot_mir = []
     for d in (digits):
+        if len(d) == 0:
+            continue
         norm.append(d[0][0])
         rot.append(d[0][1])
         rot_mir.append(d[0][2])
@@ -387,8 +389,12 @@ def get_sail_number(img):
     return results
 
 
-#sail_nums =  get_sail_number(cv2.imread('../res/sail_numbers_cropped.jpg'))
-sail_nums =  get_sail_number(cv2.imread('../res/test/test1.png'))
+# sail_nums =  get_sail_number(cv2.imread('../res/sail_numbers_cropped.jpg'))
+#sail_nums =  get_sail_number(cv2.imread('../res/test/test1.png'))
+#sail_nums =  get_sail_number(cv2.imread('../res/boats/6.png'))
+
+sail_nums =  get_sail_number(cv2.imread('../res/training images/old/training_image.png'))
+guess_numbers(sail_nums)
 for num in sail_nums:
     print num
 # img = cv2.imread('../res/boat.jpg')

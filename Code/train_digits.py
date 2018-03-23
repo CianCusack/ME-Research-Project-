@@ -34,7 +34,7 @@ for im in imgs:
                     key = cv2.waitKey(0)
 
                     if key == 27:  # (escape to quit)
-                        sys.exit()
+                        break
                     elif key in keys:
                         responses.append(int(chr(key)))
                         sample = roismall.reshape((1, 100))
@@ -46,6 +46,6 @@ responses = responses.reshape((responses.size, 1))
 print "training complete"
 print len(samples)
 print responses
-np.savetxt('generalsamples_1.data',samples)
-np.savetxt('generalresponses_slanted_1.data',responses)
+np.savetxt('redesign_samples.data',samples)
+np.savetxt('redesign_responses.data',responses)
 

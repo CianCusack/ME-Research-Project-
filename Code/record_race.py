@@ -24,7 +24,8 @@ def record_race():
     #cam = cv2.VideoCapture('../res/olympic_sailing_short.mp4')
     #cam = cv2.VideoCapture('../res/new_race_3.mov')
     #cam = cv2.VideoCapture('../res/horizontal_race.mov')
-    cam = cv2.VideoCapture('../res/KishRace6BoatCloseShort.mp4')
+    #cam = cv2.VideoCapture('../res/KishRace6BoatCloseShort.mp4')
+    cam = cv2.VideoCapture('../res/short_newer_race.mp4')
     #cam = cv2.VideoCapture('../res/KishRace1.mp4')
 
     # mode = get_direction_of_travel()
@@ -207,15 +208,15 @@ def record_race():
                         proof_img = frame.copy()
                         cv2.circle(proof_img, p, 2, (255, 0, 0), 2)
                         #draw_line_and_buoy(proof_img, draw_buoy)
-
+                        sail_number = []
                         # If the boat image is big enough attempt to read sail numbers
-                        if (boat_img.shape[1] > 50):
-                            sail_number = get_sail_number(boat_img)
-                            if len(sail_number) == 0:
-                                print 'Unable to recognise sail number'
-                                """
-                                    TO DO: Raise a flag for human intervention regarding unidentified boat
-                                """
+                        # if (boat_img.shape[1] > 50):
+                        #     sail_number = get_sail_number(boat_img)
+                        #     if len(sail_number) == 0:
+                        #         print 'Unable to recognise sail number'
+                        #         """
+                        #             TO DO: Raise a flag for human intervention regarding unidentified boat
+                        #         """
 
                         # If the intersection occurs before the race starts it is a false start
                         if not has_race_started(t0, time_to_start):
@@ -245,7 +246,7 @@ def record_race():
 
         cv2.imshow('image', frame)
         #out.write(frame)
-        cv2.waitKey(1)
+        cv2.waitKey(1000/24)
         frame_counter += 1
     print 'Total frames: {}'.format(frame_counter)
     print 'Average frame rate: {} FPS'.format(frame_counter/(time.time() - t0))
