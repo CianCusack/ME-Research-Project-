@@ -54,8 +54,8 @@ def track_buoy(frame, buoy = [], last_location = []):
             x1_c, y1_c, x2_c, y2_c = track_buoy_by_colour(frame, lower, upper)
 
             # Determine center of the area returned by both methods
-            center_1 = (int((x2-x1)/2), int((y2-y1)/2))
-            center_2 = (int((x2_c - x1_c) / 2), int((y2_c - y1_c) / 2))
+            center_1 = (int(((x2-x1)/2)+ x1), int(((y2-y1)/2)+y1))
+            center_2 = (int(((x2_c - x1_c)/ 2) + x1_c) , int(((y2_c - y1_c) / 2) +y1_c))
 
             # Find the distance between the two centroids
             d = (abs(center_1[0]- center_2[0]), abs(center_1[0]- center_2[0]))
@@ -63,7 +63,12 @@ def track_buoy(frame, buoy = [], last_location = []):
             # If the distance is too large assume neither reading is reliable and return no buoy found
             if d[0] > x2-x1 or d[1] > y2 -y1:
                 return 0, 0, 0, 0, buoy, manual_change
-
+            # cv2.rectangle(frame, (x1, y1), (x2,y2), (255,0,0), 2)
+            # cv2.rectangle(frame, (x1_c, y1_c), (x2_c,y2_c), (0,0, 255), 2)
+            # cv2.circle(frame, center_1, 2, (255,0,0), 2)
+            # cv2.circle(frame, center_2, 2, (0,0, 255), 2)
+            # cv2.imwrite('../../Conference Paper/images/buoy_detection.png', frame)
+            # cv2.waitKey(0)
         return float(x1),float(y1),float(x2),float(y2), buoy, manual_change
 
     else:
@@ -72,8 +77,7 @@ def track_buoy(frame, buoy = [], last_location = []):
 
 
 def calc_range(distance):
-    size = 3000
-    return int(size/(2*distance))
+    return int(1500/distance)
 
 
 """

@@ -67,14 +67,14 @@ def detect_digits(img):
     height, width = img.shape[:2]
     if height * width < 200:
         return None, -1
-
+    #img = cv2.resize(img, (350,420))
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     # Get MSER, and set parameters - may need to play with max
     # and min value possibly with regard to the size of the boat
     mser = cv2.MSER_create()
-    #mser.setMinArea(60)
-    #mser.setMaxArea(200)
+    # mser.setMinArea(60)
+    # mser.setMaxArea(200)
 
     # Do MSER detection, get the coordinates and bounding boxes of possible text areas
     coordinates, bboxes = mser.detectRegions(gray)
@@ -88,7 +88,6 @@ def detect_digits(img):
     # coordinates, _ = sort_contours(coordinates, 'right-to-left')
 
 
-    img_temp = img.copy()
 
     for coord in coordinates:
         bbox = cv2.boundingRect(coord)
@@ -393,10 +392,9 @@ def get_sail_number(img):
 #sail_nums =  get_sail_number(cv2.imread('../res/test/test1.png'))
 #sail_nums =  get_sail_number(cv2.imread('../res/boats/6.png'))
 
-sail_nums =  get_sail_number(cv2.imread('../res/training images/old/training_image.png'))
-guess_numbers(sail_nums)
-for num in sail_nums:
-    print num
+# sail_nums =  get_sail_number(cv2.imread('../res/test1_double.png'))
+# for num in sail_nums:
+#     print num
 # img = cv2.imread('../res/boat.jpg')
 # h, w = img.shape[:2]
 # #img = img[h/3 : (2*h)/3 , 0: w]

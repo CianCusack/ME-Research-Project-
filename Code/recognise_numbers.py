@@ -134,7 +134,7 @@ def guess_numbers(img):
                 roismall = np.float32(roismall)
 
                 # Use kNN model to try identify digit
-                value_rotated_mirrored, result, neigh_resp, dists = model.findNearest(roismall, k=11)
+                value_rotated_mirrored, result, neigh_resp, dists = model.findNearest(roismall, k=3)
                 print 'Rotated and mirrored {}, {}, {}'.format(value_rotated_mirrored, result, neigh_resp)
 
                 cv2.imshow('roismall rotated, mirrored', roi)

@@ -24,8 +24,8 @@ def record_race():
     #cam = cv2.VideoCapture('../res/olympic_sailing_short.mp4')
     #cam = cv2.VideoCapture('../res/new_race_3.mov')
     #cam = cv2.VideoCapture('../res/horizontal_race.mov')
-    #cam = cv2.VideoCapture('../res/KishRace6BoatCloseShort.mp4')
-    cam = cv2.VideoCapture('../res/short_newer_race.mp4')
+    cam = cv2.VideoCapture('../res/KishRace6BoatCloseShort.mp4')
+    #cam = cv2.VideoCapture('../res/short_newer_race.mp4')
     #cam = cv2.VideoCapture('../res/KishRace1.mp4')
 
     # mode = get_direction_of_travel()
@@ -207,7 +207,7 @@ def record_race():
                         # line and line crossing point
                         proof_img = frame.copy()
                         cv2.circle(proof_img, p, 2, (255, 0, 0), 2)
-                        #draw_line_and_buoy(proof_img, draw_buoy)
+                        draw_line_and_buoy(proof_img, draw_buoy)
                         sail_number = []
                         # If the boat image is big enough attempt to read sail numbers
                         # if (boat_img.shape[1] > 50):

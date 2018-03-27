@@ -1,15 +1,18 @@
-import sys
+from imutils import rotate
 import numpy as np
 import cv2
 import glob
 
 imgs = []
-for img in glob.glob("../res/training images/*.jpg"):
+for img in glob.glob("../res/training images/*.png"):
     imgs.append(cv2.imread(img))
 samples = np.empty((0, 100))
-responses = []
-for im in imgs:
-
+responses = np.empty((0, 100))
+responses = np.loadtxt('redesign_responses.data')
+samples = np.loadtxt('redesign_samples.data')
+for img in imgs:
+    for i in range(20, -20, -1):
+        im = rotate(img, i)
         im3 = im.copy()
 
         gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
@@ -36,7 +39,8 @@ for im in imgs:
                     if key == 27:  # (escape to quit)
                         break
                     elif key in keys:
-                        responses.append(int(chr(key)))
+                        responses = np.append(responses, int(chr(key)))
+                        print responses[-1]
                         sample = roismall.reshape((1, 100))
                         samples = np.append(samples, sample, 0)
 
