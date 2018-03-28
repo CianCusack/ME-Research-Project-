@@ -3,7 +3,7 @@ from Buoy_Detection import *
 from boat_detector import *
 from line_crossing import *
 from boat_coords import *
-from digit_recognition import *
+from digit_recognition_new import *
 
 
 # Show user first frame and have them select the buoy then press enter
@@ -210,13 +210,13 @@ def record_race():
                         draw_line_and_buoy(proof_img, draw_buoy)
                         sail_number = []
                         # If the boat image is big enough attempt to read sail numbers
-                        # if (boat_img.shape[1] > 50):
-                        #     sail_number = get_sail_number(boat_img)
-                        #     if len(sail_number) == 0:
-                        #         print 'Unable to recognise sail number'
-                        #         """
-                        #             TO DO: Raise a flag for human intervention regarding unidentified boat
-                        #         """
+                        if (boat_img.shape[1] > 50):
+                            sail_number = detect_sail_number(boat_img)
+                            if len(sail_number) == 0:
+                                print 'Unable to recognise sail number'
+                                """
+                                    TO DO: Raise a flag for human intervention regarding unidentified boat
+                                """
 
                         # If the intersection occurs before the race starts it is a false start
                         if not has_race_started(t0, time_to_start):

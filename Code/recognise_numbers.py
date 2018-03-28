@@ -21,6 +21,8 @@ def sort_contours(cnts, method="left-to-right"):
     # bottom
     boundingBoxes = [cv2.boundingRect(c) for c in cnts]
     (cnts, boundingBoxes) = zip(*sorted(zip(cnts, boundingBoxes),
+                                        key=lambda b: b[1][0], reverse=reverse))
+    (cnts, boundingBoxes) = zip(*sorted(zip(cnts, boundingBoxes),
                                         key=lambda b: b[1][i], reverse=reverse))
 
     # return the list of sorted contours and bounding boxes
@@ -85,8 +87,8 @@ def guess_numbers(img):
     # create and train kNN model
     # samples = np.loadtxt('generalsamples.data', np.float32)
     # responses = np.loadtxt('generalresponses_slanted.data', np.float32)
-    samples = np.loadtxt('redesign_samples.data', np.float32)
-    responses = np.loadtxt('redesign_responses.data', np.float32)
+    samples = np.loadtxt('redesign_samples1.data', np.float32)
+    responses = np.loadtxt('redesign_responses1.data', np.float32)
     responses = responses.reshape((responses.size, 1))
     model = cv2.ml.KNearest_create()
     model.train(samples, cv2.ml.ROW_SAMPLE, responses)
@@ -138,7 +140,7 @@ def guess_numbers(img):
                 print 'Rotated and mirrored {}, {}, {}'.format(value_rotated_mirrored, result, neigh_resp)
 
                 cv2.imshow('roismall rotated, mirrored', roi)
-                cv2.waitKey(0)
+                cv2.waitKey(1)
                 cv2.destroyAllWindows()
 
                 results = np.append(results, value)

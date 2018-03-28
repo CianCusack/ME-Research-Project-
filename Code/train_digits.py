@@ -4,15 +4,17 @@ import cv2
 import glob
 
 imgs = []
-for img in glob.glob("../res/training images/*.png"):
+for img in glob.glob("../res/training images/redesign1/*.jpg"):
     imgs.append(cv2.imread(img))
 samples = np.empty((0, 100))
 responses = np.empty((0, 100))
-responses = np.loadtxt('redesign_responses.data')
-samples = np.loadtxt('redesign_samples.data')
+# responses = np.loadtxt('redesign_responses.data')
+# samples = np.loadtxt('redesign_samples.data')
 for img in imgs:
     for i in range(20, -20, -1):
         im = rotate(img, i)
+        h1, w1 = im.shape[:2]
+        im = im[h1/5 : (4*h1)/5, w1/5 : (4*w1)/5]
         im3 = im.copy()
 
         gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
@@ -50,6 +52,6 @@ responses = responses.reshape((responses.size, 1))
 print "training complete"
 print len(samples)
 print responses
-np.savetxt('redesign_samples.data',samples)
-np.savetxt('redesign_responses.data',responses)
+np.savetxt('redesign_samples1.data',samples)
+np.savetxt('redesign_responses1.data',responses)
 

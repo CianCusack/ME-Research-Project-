@@ -390,11 +390,11 @@ def get_sail_number(img):
 
 # sail_nums =  get_sail_number(cv2.imread('../res/sail_numbers_cropped.jpg'))
 #sail_nums =  get_sail_number(cv2.imread('../res/test/test1.png'))
-#sail_nums =  get_sail_number(cv2.imread('../res/boats/6.png'))
-
-# sail_nums =  get_sail_number(cv2.imread('../res/test1_double.png'))
+# sail_nums =  get_sail_number(cv2.imread('../res/boats/8.png'))
+#
+# # sail_nums =  get_sail_number(cv2.imread('../res/test1_double.png'))
 # for num in sail_nums:
-#     print num
+#      print num
 # img = cv2.imread('../res/boat.jpg')
 # h, w = img.shape[:2]
 # #img = img[h/3 : (2*h)/3 , 0: w]
