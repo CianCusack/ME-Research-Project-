@@ -93,16 +93,23 @@ def detect_sail_number(im):
                 roismall = cv2.resize(roi,(10,10))
                 roismall = roismall.reshape((1,100))
                 roismall = np.float32(roismall)
-                retval, results, neigh_resp, dists = model.findNearest(roismall, k = 1)
+                retval, results, neigh_resp, dists = model.findNearest(roismall, k = 3)
                 string = str(int((results[0][0])))
                 result.append(string)
                 cv2.rectangle(im, (x, y), (x + w1, y + h1), (0, 255, 0), 1)
                 cv2.putText(out, string, (x, y + h1), 0, 1, (0, 255, 0))
                 last_x = x
+
         for i in range(0, len(vals)):
             if vals[i] != 0:
                 sail_num.append(result[i])
         sail_nums.append( ''.join(sail_num))
+        if len(r) <= 1:
+            continue
+
+        d = sum([r[i][2] for i in range(0, len(r)-1)])/len(r)
+        b = sum([r[i][3] for i in range(0, len(r)-1)])/len(r)
+        print d, b
     numbers = pd.read_csv('../res/sample sail numbers.csv', dtype={'ID': str})
     nums = [str(num[0]) for num in numbers.values]
 
@@ -110,7 +117,7 @@ def detect_sail_number(im):
     sail_nums = sorted(sail_nums, key=lambda k : -len(k))
     final_sail_number = []
     for num in sail_nums:
-        res = difflib.get_close_matches(num, nums, cutoff=0.825)
+        res = difflib.get_close_matches(num, nums, cutoff=0.66)
         if len(res) == 0 :
             continue
         final_sail_number.append(res)
@@ -126,13 +133,13 @@ def detect_sail_number(im):
 
     #print 'next'
 
-for i in range(6,11):
+for i in range(11,12):
     img = cv2.imread('../res/boats/{}.png'.format(i))
     h, w = img.shape[:2]
-    img = cv2.resize(img, (3 * w , 3*h))
-    print detect_sail_number(img)
+    #img = cv2.resize(img, (3 * w , 3*h))
+    print detect_sail_number(img.copy())
     for j in range(1,8):
         h, w = img.shape[:2]
         img = cv2.resize(img, (3*w / (4), 3*h / (4 )))
-        print detect_sail_number(img)
+        print detect_sail_number(img.copy())
     print 'end'
