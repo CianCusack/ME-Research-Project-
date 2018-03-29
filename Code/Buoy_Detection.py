@@ -77,7 +77,7 @@ def track_buoy(frame, buoy = [], last_location = []):
 
 
 def calc_range(distance):
-    return int(1500/distance)
+    return int(1500.0/distance)
 
 
 """

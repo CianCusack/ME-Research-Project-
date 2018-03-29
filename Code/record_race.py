@@ -24,9 +24,10 @@ def record_race():
     #cam = cv2.VideoCapture('../res/olympic_sailing_short.mp4')
     #cam = cv2.VideoCapture('../res/new_race_3.mov')
     #cam = cv2.VideoCapture('../res/horizontal_race.mov')
-    cam = cv2.VideoCapture('../res/KishRace6BoatCloseShort.mp4')
+    #cam = cv2.VideoCapture('../res/KishRace6BoatCloseShort.mp4')
     #cam = cv2.VideoCapture('../res/short_newer_race.mp4')
     #cam = cv2.VideoCapture('../res/KishRace1.mp4')
+    cam = cv2.VideoCapture('../res/march_5.mov')
 
     # mode = get_direction_of_travel()
 
@@ -106,9 +107,20 @@ def record_race():
             Only want to detect boats every n frames and on first frame
             We need to create a seperate tracker for each boat
         """
-        if frame_counter % 5 == 0 or frame_counter == 1:
+        if frame_counter % 5 == 0 or frame_counter == 1 or buoy_x1 == 0:
 
             if buoy_x1 == 0:
+                # This section is purely for display to show the finish line, buoy, time (secs) and FPS
+                draw_line_and_buoy(frame, draw_buoy)
+                cv2.putText(frame, "TIME : " + str(round(time.time() - t0, 2)), (100, 110),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50, 170, 50), 2);
+                cv2.putText(frame, "Total Frames : " + str(frame_counter), (100, 50),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50, 170, 50), 2);
+
+                cv2.imshow('image', frame)
+                # out.write(frame)
+                cv2.waitKey(1)
+                frame_counter += 1
                 continue
 
             # Handle left to right and right to left direction of travel
@@ -126,17 +138,19 @@ def record_race():
         # Track boats that were detected on the last detection
         for i, c in enumerate(coords):
 
-                # Only concerned with boats that are close to the line i.e. between the start of the line and the buoy
-                if mode == 1 and ((c[2] > buoy_x1 and c[2] > w/2) or (c[2] < buoy_x1 and c[2] < w/2)):
-                    continue
-                elif mode == 2 and ((c[0] > buoy_x2 and c[0] > w/2) or (c[0] < buoy_x2 and c[0] < w/2)):
-                    continue
+                # # Only concerned with boats that are close to the line i.e. between the start of the line and the buoy
+                # if mode == 1 and ((c[2] > buoy_x1 and c[2] > w/2) or (c[2] < buoy_x1 and c[2] < w/2)):
+                #     continue
+                # elif mode == 2 and ((c[0] > buoy_x2 and c[0] > w/2) or (c[0] < buoy_x2 and c[0] < w/2)):
+                #     continue
 
                 #cv2.rectangle(frame, (c[0], c[1]), (c[2], c[3]), (255,0,0), 2)
 
                 # Initialize tracker with first frame and bounding box
                 t = trackers[i]
-                t.init(frame, (c[0], c[1]+(c[3]-c[1])/2, c[2], c[3]))
+                # t.init(frame, (c[0], c[1]+(c[3]-c[1])/2, c[2], c[3]))
+
+                t.init(frame, (c[0], c[1], c[2], c[3]))
 
                 # Update tracker
                 ok, bbox = t.update(frame)
@@ -150,12 +164,13 @@ def record_race():
                 if p1[0] < 0 or p1[1] < 0 or p2[0] < 0 or p2[1] < 0:
                     continue
 
-                # If the rightmost point is before the start of the line continue
-                if p2[0] < w/ 2:
-                    continue
+                # # If the rightmost point is before the start of the line continue
+                # if p2[0] < w/ 2:
+                #     continue
 
                 # Extract boat image from original image for processing
                 boat_img = frame[p1[1]:p2[1], p1[0]:p2[0]]
+                #cv2.rectangle(frame, p1, p2, (0,0,255), 2)
 
 
                 # Discard boats that are too small to process meaningfully
@@ -163,7 +178,7 @@ def record_race():
                     continue
 
                 # Get the extreme points of the boat for line crossing
-                extreme_points = get_extreme_point(boat_img, mode)
+                extreme_points = get_extreme_point(boat_img.copy(), mode)
 
                 # If no points are found continue
                 if extreme_points == None:
@@ -174,11 +189,11 @@ def record_race():
 
                 for p in new_points:
 
-                    # Ignore points that are not close to the line
-                    if mode == 1 and (p[0] > buoy_x1 or p[0] < w / 2):
-                        continue
-                    elif mode == 2 and (p[0] < buoy_x1 or p[0] > w / 2):
-                        continue
+                    # # Ignore points that are not close to the line
+                    # if mode == 1 and (p[0] > buoy_x1 or p[0] < w / 2):
+                    #     continue
+                    # elif mode == 2 and (p[0] < buoy_x1 or p[0] > w / 2):
+                    #     continue
 
                     # Ignore points near points that have been detected as crossing the line since last cleared line_crossing
                     if len(line_crossing) != 0:
@@ -198,7 +213,7 @@ def record_race():
                     m1 = slope(p, (buoy_x1, buoy_y2), 3)
 
                     # If the slope of boat point is in an acceptable range it has crossed the line
-                    if m1 > m-.1 and m1 < m+.1:
+                    if m1 > m-.2 and m1 < m+.2:
 
                         # Add point of intersection to detected points to avoid repetition
                         line_crossing.append(p)
@@ -211,7 +226,7 @@ def record_race():
                         sail_number = []
                         # If the boat image is big enough attempt to read sail numbers
                         if (boat_img.shape[1] > 50):
-                            sail_number = detect_sail_number(boat_img)
+                            sail_number = detect_sail_number(boat_img.copy())
                             if len(sail_number) == 0:
                                 print 'Unable to recognise sail number'
                                 """
@@ -246,7 +261,7 @@ def record_race():
 
         cv2.imshow('image', frame)
         #out.write(frame)
-        cv2.waitKey(1000/24)
+        cv2.waitKey(1)
         frame_counter += 1
     print 'Total frames: {}'.format(frame_counter)
     print 'Average frame rate: {} FPS'.format(frame_counter/(time.time() - t0))
