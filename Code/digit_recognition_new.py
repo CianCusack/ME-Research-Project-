@@ -104,12 +104,12 @@ def detect_sail_number(im):
             if vals[i] != 0:
                 sail_num.append(result[i])
         sail_nums.append( ''.join(sail_num))
-        # if len(r) <= 1:
-        #     continue
-        #
-        # d = sum([r[i][2] for i in range(0, len(r)-1)])/len(r)
-        # b = sum([r[i][3] for i in range(0, len(r)-1)])/len(r)
-        # print d, b
+        if len(r) <= 1:
+            continue
+
+        d = sum([r[i][2] for i in range(0, len(r)-1)])/len(r)
+        b = sum([r[i][3] for i in range(0, len(r)-1)])/len(r)
+        print d, b
     numbers = pd.read_csv('../res/sample sail numbers.csv', dtype={'ID': str})
     nums = [str(num[0]) for num in numbers.values]
 
@@ -124,7 +124,7 @@ def detect_sail_number(im):
 
     cv2.imshow('im',im)
     cv2.imshow('out',out)
-    cv2.waitKey(0)
+
     if len(final_sail_number) != 0:
         final_sail_number = sorted(final_sail_number, key= lambda k : -len(k))
         return final_sail_number[0]
@@ -134,16 +134,17 @@ def detect_sail_number(im):
 
     #print 'next'
 
-# for i in range(10,11):
-#     # img = cv2.imread('../res/boats/{}.png'.format(i))
-#     img = cv2.imread('../res/sail_nums_example.png')
-#     h, w = img.shape[:2]
-#     #img = cv2.resize(img, (3 * w , 3*h))
-#     print detect_sail_number(img.copy())
-#     for j in range(1,8):
-#         h, w = img.shape[:2]
-#         img = cv2.resize(img, (3*w / (4), 3*h / (4 )))
-#         print detect_sail_number(img.copy())
-#     print 'end'
+for i in range(11,25):
+    img = cv2.imread('../res/boats/{}.png'.format(i))
+    #img = cv2.imread('../res/sail_nums_example.png')
+    h, w = img.shape[:2]
+    #img = cv2.resize(img, (3 * w , 3*h))
+    print detect_sail_number(img.copy())
+    for j in range(1,8):
+        h, w = img.shape[:2]
+        img = cv2.resize(img, (3*w / (4), 3*h / (4 )))
+        print detect_sail_number(img.copy())
+        cv2.waitKey(0)
+    print 'end'
 
 
