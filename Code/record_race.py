@@ -16,7 +16,7 @@ def setup(cam, mode):
     cv2.imshow('image', first)
     cv2.waitKey(0)
 
-def record_race():
+def record_race(distance, colour, mode):
 
     #Choose camera
     #cam = cv2.VideoCapture(0)
@@ -85,7 +85,7 @@ def record_race():
         """
         if (frame_counter % 3 == 0 or frame_counter == 1):
 
-            buoy_x1, buoy_y1, buoy_x2, buoy_y2, buoy, user_change = track_buoy(frame, buoy, [last_x1, last_y1, last_x2, last_y2])
+            buoy_x1, buoy_y1, buoy_x2, buoy_y2, buoy, user_change = track_buoy(frame, distance, colour, buoy, [last_x1, last_y1, last_x2, last_y2])
 
             buoy_size = buoy.shape[:2]
             if ((buoy_x1 == 0.0 and buoy_y1 == 0.0) or (abs(buoy_x1 - last_x1) > buoy_size[0] or abs(buoy_y1 - last_y1) > buoy_size[1]) and frame_counter > 1) and not user_change:#  and frame_counter %23 != 0:
