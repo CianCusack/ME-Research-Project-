@@ -59,7 +59,7 @@ def get_extreme_point(img, mode):
                 continue
             points.append((x, y))
 
-        # Sort the points by x coord from high to low and return top 10
+        # Sort the points by x coord from high to low
         sorted_by_x = sorted(points, key=lambda tup: tup[0])
 
     return sorted_by_x[:25]

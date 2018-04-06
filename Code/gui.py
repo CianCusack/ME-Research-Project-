@@ -3,7 +3,7 @@ from record_race import record_race
 
 # Run the recording software, until video input ends
 def run(E1, E2, E3):
-    record_race(int(E1.get()),E2.get(), E3.get())
+    record_race(int(E1.get()),E2.get(), int(E3.get()))
     exit(1)
 
 top = Tk()

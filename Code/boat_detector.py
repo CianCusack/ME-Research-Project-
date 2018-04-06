@@ -13,6 +13,7 @@ def detect_boats(image):
                "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
                "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
                "sofa", "train", "tvmonitor"]
+
     # current frame is used to construct an input blob by resizing it to a
     # fixed 300x300 pixels and then normalizing it
     (h, w) = image.shape[:2]
@@ -29,11 +30,15 @@ def detect_boats(image):
         #Get the confidence of the object found
         confidence = detections[0, 0, i, 2]
         idx = int(detections[0, 0, i, 1])
+
         # Ignore detections below confidence or errors where background is detected
         # i.e. confidence should always be between threshold and 1, ignore all else
         if confidence > confidence_thresh and confidence <= 1:
+
+            # Ignore anything that is not a boat
             if CLASSES[idx] != 'boat':
                 continue
+
             # Compute the position of the boat and add it to the boat_positions array
             box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
             startX, startY, endX, endY = box.astype("int")

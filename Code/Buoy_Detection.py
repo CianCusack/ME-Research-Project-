@@ -6,8 +6,6 @@ from colour_detection import track_buoy_by_colour
 yCoord = 296
 xCoord = 777
 count = 0
-# distance = 0
-# colour = ''
 
 # Mouse callback function to take user input as the position of the buoy
 def buoy_points(event,x,y,flags,param):
@@ -18,18 +16,18 @@ def buoy_points(event,x,y,flags,param):
         count = 0
 
 def track_buoy(frame, distance, colour, buoy = [], last_location = []):
-    global count#, colour, distance
+    global count
     manual_change = False
+
     if xCoord != 100 and yCoord != 100:
+
         #Find the buoy - only performed when user clicks the screen to select the buoy
         if count ==0:
-            # distance = input('Approximately how far away is the buoy?')
-            # colour = raw_input('What is the main colour of the buoy?')
-            # distance = 200
-            # colour = ''
-            #get approx size of buoy
+
+            # Get buoy size
             size = calc_range(distance)
-            #Get buoy image
+
+            # Get buoy image
             buoy = frame[yCoord - size:yCoord + size, xCoord - size:xCoord + size].copy()
 
             count += 1
@@ -63,13 +61,9 @@ def track_buoy(frame, distance, colour, buoy = [], last_location = []):
             # If the distance is too large assume neither reading is reliable and return no buoy found
             if d[0] > x2-x1 or d[1] > y2 -y1:
                 return 0, 0, 0, 0, buoy, manual_change
-            cv2.rectangle(frame, (x1, y1), (x2,y2), (255,0,0), 2)
-            cv2.rectangle(frame, (x1_c, y1_c), (x2_c,y2_c), (0,0, 255), 2)
-            cv2.circle(frame, center_1, 2, (255,0,0), 2)
-            cv2.circle(frame, center_2, 2, (0,0, 255), 2)
-            cv2.imwrite('../../Thesis/images/buoy detection/buoy_detection{}.png'.format(count), frame)
-            cv2.waitKey(0)
+
             count += 1
+            
         return float(x1),float(y1),float(x2),float(y2), buoy, manual_change
 
     else:
