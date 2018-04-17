@@ -5,6 +5,7 @@ from line_crossing import *
 from boat_coords import *
 from digit_recognition_new import *
 import datetime
+import math
 
 # Show user first frame and have them select the buoy then press enter
 def setup(filename):
@@ -21,6 +22,12 @@ def setup(filename):
 
     # Get the height and width of the frame
     h, w = first.shape[:2]
+
+    # Create a finishes file
+    file = open('../res/finishes/' + filename + '.txt', "w")
+    file.write('| Sail Number | Duration | Time     | \n')
+    file.write('--------------------------------------\n')
+    file.close()
 
     return cam, h, w
 
@@ -104,7 +111,7 @@ def record_race(distance, colour, mode = 1):
             Only want to detect boats every n frames and on first frame
             We need to create a seperate tracker for each boat
         """
-        if frame_counter % 3 == 0 or frame_counter == 1 :
+        if frame_counter % 5 == 0 or frame_counter == 1 :
 
             # Handle left to right and right to left direction of travel
             if mode == 1:
@@ -168,7 +175,7 @@ def record_race(distance, colour, mode = 1):
 
                             # Write finish time and sail number to output file as results
                             file = open('../res/finishes/' + filename + '.txt', "a")
-                            file.write('Boat  with sail number {} finished at {} with a time of {}\n'.format(sail_number, datetime.datetime.now().time(), float(frame_counter)/24))
+                            file.write('| {}      | {} \t | {} | \n'.format(sail_number, float((frame_counter)/24), datetime.datetime.now().time().strftime("%H:%M:%S")))
                             file.close()
 
                             boat_crossing_counter += 1

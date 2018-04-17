@@ -1,5 +1,3 @@
-import math
-
 # Calculate slope of the line between two given points
 def slope(p1, p2, accuracy):
 
